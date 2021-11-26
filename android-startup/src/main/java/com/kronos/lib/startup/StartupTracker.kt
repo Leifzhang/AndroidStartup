@@ -18,6 +18,7 @@ internal fun track(taskName: String, duration: Long) {
 }
 
 
+
 private fun getTag(task: StartupTask): String {
-    return task.tag()?.takeIf { it.isNotEmpty() } ?: task.javaClass.simpleName
+    return task.tag().takeIf { it.isNotEmpty() } ?: task.javaClass.simpleName
 }

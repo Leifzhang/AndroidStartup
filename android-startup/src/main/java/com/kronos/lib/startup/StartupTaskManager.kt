@@ -10,6 +10,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
+
 internal class StartupTaskManager {
 
     private val dispatcher = StartupDispatcher()
@@ -112,16 +113,12 @@ private fun printTasks(tasks: List<StartupTask>) {
     Log.i(TAG, msg.toString())
 }
 
-/*fun Class<out StartupTask>.key(): String {
-    return canonicalName ?: simpleName
-}*/
-
 fun log(task: StartupTask, msg: String) {
-    val tag = task.tag()?.takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
+    val tag = task.tag().takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
     Log.i(TAG, "$tag: $msg")
 }
 
 fun StartupTask.string(): String {
-    val tag = tag()?.takeIf { it.isNotBlank() } ?: javaClass.simpleName
+    val tag = tag().takeIf { it.isNotBlank() } ?: javaClass.simpleName
     return "tag: $tag, mainThread: ${mainThread()}, await: ${await()}, dependencyCount: ${dependencies().size ?: 0}"
 }

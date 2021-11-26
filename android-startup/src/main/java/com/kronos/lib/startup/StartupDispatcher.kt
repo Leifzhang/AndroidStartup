@@ -6,9 +6,10 @@ import android.util.Log
 import java.util.concurrent.Executors
 
 /**
- * @author : windfall
- * @date : 2021/6/16
- * @mail : liuchangjiang@bilibili.com
+ *
+ *  @Author LiABao
+ *  @Since 2021/11/26
+ *
  */
 internal class StartupDispatcher {
 
@@ -41,7 +42,6 @@ internal class StartupDispatcher {
         Log.i(COAST_TAG, "$tag: task completed. cost: ${duration}ms")
         log(task, "task completed. cost: ${duration}ms")
         track(task, duration)
-
     }
 
     companion object {

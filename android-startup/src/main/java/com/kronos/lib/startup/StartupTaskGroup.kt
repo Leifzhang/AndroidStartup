@@ -1,13 +1,13 @@
 package com.kronos.lib.startup
 
 /**
- * @author : windfall
- * @date : 2021/6/16
- * @mail : liuchangjiang@bilibili.com
+ *
+ *  @Author LiABao
+ *  @Since 2021/11/26
+ *
  */
-open class StartupTaskGroup {
 
-    fun group(): List<StartupTask>? {
-        return null
-    }
+interface StartupTaskGroup {
+
+    fun group(): MutableList<StartupTask>
 }

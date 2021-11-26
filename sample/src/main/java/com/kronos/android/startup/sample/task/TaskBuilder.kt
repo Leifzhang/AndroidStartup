@@ -2,7 +2,8 @@ package com.kronos.android.startup.sample.task
 
 import android.app.Application
 import android.util.Log
-import com.kronos.lib.startup.insertTask
+import com.kronos.lib.startup.addTask
+import com.kronos.lib.startup.asyncTask
 import com.kronos.lib.startup.startUp
 
 /**
@@ -13,21 +14,35 @@ import com.kronos.lib.startup.startUp
  */
 fun Application.create() {
     startUp(this) {
-        insertTask("taskA") {
+        addTask("taskA") {
             info("taskA")
         }
-        insertTask("taskB") {
+        addTask({
+            info("taskD")
+        }, {
+            tag = "taskD"
+            dependOn("taskC")
+        })
+        addTask("taskB") {
             info("taskB")
         }
-        insertTask("taskC") {
+        addTask("taskC") {
             info("taskC")
         }
+        val anchorTask = MyAnchorTask()
+        addTask(anchorTask)
+        setTaskAnchor(anchorTask)
+        val task = asyncTask("asyncTaskA", {
+            info("asyncTaskA")
+        })
+        dependAnchorTask(task)
     }.build().start()
 }
 
 
 fun info(info: String) {
-    Log.i(TAG, info)
+    val threadName = Thread.currentThread().name
+    Log.i(TAG, "[threadName:$threadName] $info")
 }
 
 const val TAG = "START-DSL—TEST"

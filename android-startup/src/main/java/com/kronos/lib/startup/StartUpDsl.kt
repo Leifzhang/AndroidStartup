@@ -15,19 +15,35 @@ fun startUp(context: Application, invoke: Startup.Builder.() -> Unit): Startup.B
     Startup.newBuilder().attach(context).apply(invoke)
 
 
-fun Startup.Builder.insertTask(name: String, runnable: (Context) -> Unit) =
+fun Startup.Builder.addTask(name: String, runnable: (Context) -> Unit) =
     run { addTask(simpleTask(name, runnable)) }
 
-fun Startup.Builder.insertTask(runnable: (Context) -> Unit) =
+fun Startup.Builder.addTask(runnable: (Context) -> Unit) =
     run { addTask(simpleTask(runnable)) }
 
 
-fun Startup.Builder.insertTask(runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit) =
+fun Startup.Builder.addTask(runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit) =
     run { addTask(task(runnable, builder)) }
 
 
+fun Startup.Builder.addAsyncTask(
+    name: String,
+    runnable: (Context) -> Unit,
+    builder: TaskBuilder.() -> Unit = {}
+) = run {
+    addTask(asyncTask(name, runnable, builder))
+}
+
 fun simpleTask(name: String, runnable: (Context) -> Unit) =
     TaskBuilder(runnable).apply { tag = name }.build()
+
+
+fun asyncTask(name: String, runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit = {}) =
+    TaskBuilder(runnable).apply {
+        tag = name
+        mainThread = false
+        builder.invoke(this)
+    }.build()
 
 fun simpleTask(runnable: (Context) -> Unit) =
     TaskBuilder(runnable).build()

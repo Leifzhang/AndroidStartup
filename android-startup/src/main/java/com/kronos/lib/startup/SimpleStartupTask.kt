@@ -1,11 +1,14 @@
 package com.kronos.lib.startup
 
 /**
- * @author : windfall
- * @date : 2021/6/16
- * @mail : liuchangjiang@bilibili.com
+ *
+ *  @Author LiABao
+ *  @Since 2021/11/26
+ *
  */
 abstract class SimpleStartupTask : StartupTask {
+
+    private val dependOns = hashSetOf<String>()
 
     override fun mainThread(): Boolean {
         return true
@@ -15,5 +18,23 @@ abstract class SimpleStartupTask : StartupTask {
         return false
     }
 
+    override fun tag(): String {
+        return javaClass.canonicalName ?: ""
+    }
 
+    override fun onTaskStart() {
+
+    }
+
+    override fun onTaskCompleted() {
+
+    }
+
+    override fun dependencies(): MutableList<String> {
+        return dependOns.toMutableList()
+    }
+
+    fun dependOn(name: String) {
+        dependOns.add(name)
+    }
 }

@@ -46,12 +46,12 @@ private class SimpleBuilderTask(private val builder: TaskBuilder) : SimpleStartu
         return builder.await
     }
 
-    override fun dependencies(): List<String> {
+    override fun dependencies(): MutableList<String> {
         return builder.dependOnTasks
     }
 
     override fun tag(): String {
-        return builder.tag ?: ""
+        return builder.tag ?: tag()
     }
 
     override fun toString(): String {
