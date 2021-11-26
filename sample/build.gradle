@@ -42,7 +42,7 @@ dependencies {
 /*    implementation('com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.5.2') {
         transitive = false
     }*/
-    implementation project(":android-startup")
+    implementation project(':startup')
     testImplementation 'junit:junit:'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

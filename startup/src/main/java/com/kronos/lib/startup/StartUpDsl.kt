@@ -23,7 +23,6 @@ fun Startup.Builder.addTask(runnable: (Context) -> Unit, builder: TaskBuilder.()
     run { addTask(task(runnable, builder)) }
 
 
-
 fun Startup.Builder.addAsyncTask(
     name: String,
     runnable: (Context) -> Unit,

@@ -1,4 +1,4 @@
-package com.rousetime.android_startup
+package com.kronos.android_startup
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.rousetime.android_startup
+package com.kronos.android_startup
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
