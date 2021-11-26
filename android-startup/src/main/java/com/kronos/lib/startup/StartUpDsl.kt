@@ -18,12 +18,10 @@ fun startUp(context: Application, invoke: Startup.Builder.() -> Unit): Startup.B
 fun Startup.Builder.addTask(name: String, runnable: (Context) -> Unit) =
     run { addTask(simpleTask(name, runnable)) }
 
-fun Startup.Builder.addTask(runnable: (Context) -> Unit) =
-    run { addTask(simpleTask(runnable)) }
-
 
 fun Startup.Builder.addTask(runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit) =
     run { addTask(task(runnable, builder)) }
+
 
 
 fun Startup.Builder.addAsyncTask(

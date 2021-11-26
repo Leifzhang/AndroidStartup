@@ -2,9 +2,8 @@ package com.kronos.android.startup.sample.task
 
 import android.app.Application
 import android.util.Log
-import com.kronos.lib.startup.addTask
-import com.kronos.lib.startup.asyncTask
-import com.kronos.lib.startup.startUp
+import com.kronos.lib.startup.*
+import java.lang.Thread.sleep
 
 /**
  *
@@ -34,11 +33,42 @@ fun Application.create() {
         setTaskAnchor(anchorTask)
         val task = asyncTask("asyncTaskA", {
             info("asyncTaskA")
+        }, {
+            dependOn("asyncTaskD")
         })
         dependAnchorTask(task)
+        addTaskGroup(taskGroup())
+        dependAnchorTask(asyncTask("asyncTaskB", {
+            info("asyncTaskB")
+        }, {
+            dependOn("asyncTaskA")
+        }))
+        dependAnchorTask(asyncTask("asyncTaskC", {
+            info("asyncTaskC")
+            sleep(1000)
+        }))
+        dependAnchorTask(asyncTask("asyncTaskD", {
+            info("asyncTaskD")
+            sleep(1000)
+        }))
+        dependAnchorTask(asyncTask("asyncTaskE", {
+            info("asyncTaskE")
+            sleep(1000)
+        }))
     }.build().start()
 }
 
+// 启动任务组
+fun taskGroup(): StartupTaskGroup {
+    return startupTaskGroup {
+        add(simpleTask("group_1") {
+            info("group_1")
+        })
+        add(simpleTask("group_2") {
+            info("group_2")
+        })
+    }
+}
 
 fun info(info: String) {
     val threadName = Thread.currentThread().name

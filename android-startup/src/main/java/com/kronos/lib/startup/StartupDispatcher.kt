@@ -3,6 +3,8 @@ package com.kronos.lib.startup
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
+import com.kronos.lib.startup.thread.StartUpThreadFactory
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 /**
@@ -11,9 +13,9 @@ import java.util.concurrent.Executors
  *  @Since 2021/11/26
  *
  */
-internal class StartupDispatcher {
+internal class StartupDispatcher(executor: Executor? = null) {
 
-    private val executor = Executors.newFixedThreadPool(2)
+    private val mExecutor = executor ?: Executors.newFixedThreadPool(4, StartUpThreadFactory())
 
     fun dispatch(
         context: Context,
@@ -24,7 +26,7 @@ internal class StartupDispatcher {
             execute(context, task)
             onCompleted?.invoke(task)
         } else {
-            executor.execute {
+            mExecutor.execute {
                 execute(context, task)
                 onCompleted?.invoke(task)
             }
@@ -38,7 +40,7 @@ internal class StartupDispatcher {
         task.run(context)
         task.onTaskCompleted()
         val duration = SystemClock.elapsedRealtime() - start
-        val tag = task.tag()?.takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
+        val tag = task.tag().takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
         Log.i(COAST_TAG, "$tag: task completed. cost: ${duration}ms")
         log(task, "task completed. cost: ${duration}ms")
         track(task, duration)
@@ -48,4 +50,5 @@ internal class StartupDispatcher {
         private const val COAST_TAG = "Startup.Coast"
     }
 }
+
 

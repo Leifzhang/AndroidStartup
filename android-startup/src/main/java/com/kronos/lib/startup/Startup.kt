@@ -2,6 +2,7 @@ package com.kronos.lib.startup
 
 import android.app.Application
 import java.util.*
+import java.util.concurrent.Executor
 
 /**
  *
@@ -14,7 +15,8 @@ internal const val TAG = "Startup"
 
 class Startup private constructor(private val builder: Builder) {
 
-    private val manager = StartupTaskManager()
+    private val manager = StartupTaskManager(builder.mExecutor)
+
 
     companion object {
         @JvmStatic
@@ -29,6 +31,8 @@ class Startup private constructor(private val builder: Builder) {
         val tasks: MutableList<StartupTask> = ArrayList()
         var app: Application? = null
         private var mTaskAnchor: StartupTask? = null
+        internal var mExecutor: Executor? = null
+
 
         fun attach(app: Application): Builder {
             this.app = app
@@ -61,6 +65,11 @@ class Startup private constructor(private val builder: Builder) {
             if (!tasks.contains(task)) {
                 tasks.add(AnchorTaskWrap(task, mTaskAnchor?.tag() ?: ""))
             }
+            return this
+        }
+
+        fun setExecutor(executor: Executor): Builder {
+            mExecutor = executor
             return this
         }
 

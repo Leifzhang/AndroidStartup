@@ -5,15 +5,16 @@ import android.os.SystemClock
 import android.util.Log
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
 
-internal class StartupTaskManager {
+internal class StartupTaskManager(executor: Executor? = null) {
 
-    private val dispatcher = StartupDispatcher()
+    private val dispatcher = StartupDispatcher(executor)
     private var countDownLatch: CountDownLatch? = null
 
     fun start(context: Context, tasks: List<StartupTask>) {
@@ -49,26 +50,33 @@ internal class StartupTaskManager {
         Log.i(TAG, "origin tasks:")
         printTasks(tasks)
         val result: MutableList<StartupTask> = ArrayList()
+        val taskTags = hashSetOf<String>()
 
         val taskMap: MutableMap<String, StartupTask> = HashMap()
         val inDegreeMap: MutableMap<String, Int> = HashMap()
         val zeroInDegreeQueue = ArrayDeque<String>()
         val dependencyMap: MutableMap<String, MutableList<String>> = HashMap()
-
-        for (task in tasks) {
+        tasks.forEach {
+            taskTags.add(it.tag())
+        }
+        tasks.forEach { task ->
             val key = task.tag()
             taskMap[key] = task
-            val inDegree = task.dependencies().size
+            val dependencies = task.dependencies().filter {
+                taskTags.contains(it)
+            }
+            val inDegree = dependencies.size
             inDegreeMap[key] = inDegree
             if (inDegree == 0) {
                 zeroInDegreeQueue.offer(key)
             } else {
-                task.dependencies().forEach { dependency ->
+                dependencies.forEach { dependency ->
                     if (dependencyMap[dependency] == null) {
                         dependencyMap[dependency] = arrayListOf()
                     }
-                    dependencyMap[dependency]?.add(key)
-
+                    if (taskTags.contains(key)) {
+                        dependencyMap[dependency]?.add(key)
+                    }
                 }
             }
         }
@@ -82,7 +90,6 @@ internal class StartupTaskManager {
                 taskMap[it]?.let { task ->
                     result.add(task)
                 }
-
                 dependencyMap[it]?.forEach { dependencyKey ->
                     val inDegree =
                         inDegreeMap[dependencyKey]?.minus(1)?.takeIf { inDegree -> inDegree >= 0 }
