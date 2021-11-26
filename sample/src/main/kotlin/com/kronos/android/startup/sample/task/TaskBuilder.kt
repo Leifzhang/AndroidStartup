@@ -3,6 +3,7 @@ package com.kronos.android.startup.sample.task
 import android.app.Application
 import android.util.Log
 import com.kronos.lib.startup.*
+import com.kronos.lib.startup.group.StartupTaskGroupApplicationKsp
 import java.lang.Thread.sleep
 
 /**
@@ -55,6 +56,7 @@ fun Application.create() {
             info("asyncTaskE")
             sleep(1000)
         }))
+        addTaskGroup(StartupTaskGroupApplicationKsp())
     }.build().start()
 }
 
