@@ -1,0 +1,2 @@
+include ':android-startup'
+include ':sample'
