@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id("com.google.devtools.ksp") version "1.5.30-1.0.0"
 }
 
 android {
@@ -22,15 +23,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
     buildFeatures {
         viewBinding = true
+    }
+}
+// 项目内如果想要引用到生成的代码 使用下列方式
+kotlin {
+    sourceSets.main {
+        kotlin.srcDir("build/generated/ksp/main/kotlin")
+        kotlin.srcDir("build/generated/ksp/debug/kotlin")
+    }
+    sourceSets.test {
+        kotlin.srcDir("build/generated/ksp/test/kotlin")
     }
 }
 
@@ -42,8 +46,10 @@ dependencies {
 /*    implementation('com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.5.2') {
         transitive = false
     }*/
-    implementation project(":android-startup")
-    testImplementation 'junit:junit:'
+    implementation project(':startup')
+    implementation project(':startup-annotation')
+    ksp project(":startup-ksp-compiler")
+    testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
