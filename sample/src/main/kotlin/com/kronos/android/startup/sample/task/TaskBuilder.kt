@@ -47,6 +47,8 @@ fun Application.create() {
         dependAnchorTask(asyncTask("asyncTaskC", {
             info("asyncTaskC")
             sleep(1000)
+        }, {
+            dependOn("asyncTaskE")
         }))
         dependAnchorTask(asyncTask("asyncTaskD", {
             info("asyncTaskD")
@@ -54,7 +56,7 @@ fun Application.create() {
         }))
         dependAnchorTask(asyncTask("asyncTaskE", {
             info("asyncTaskE")
-            sleep(1000)
+            sleep(10000)
         }))
         addTaskGroup(StartupTaskGroupApplicationKsp())
     }.build().start()

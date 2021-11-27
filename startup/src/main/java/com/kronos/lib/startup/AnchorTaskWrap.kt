@@ -14,6 +14,18 @@ class AnchorTaskWrap(
     private val anchorTaskName: String?
 ) : StartupTask {
 
+
+
+    override fun dependencies(): MutableList<String> {
+        return task.dependencies().apply {
+            if (contains(anchorTaskName)) return@apply
+            anchorTaskName ?: return@apply
+            if (!TextUtils.isEmpty(anchorTaskName)) {
+                add(anchorTaskName)
+            }
+        }
+    }
+
     override fun run(context: Context) {
         task.run(context)
     }
@@ -29,17 +41,6 @@ class AnchorTaskWrap(
     override fun tag(): String {
         return task.tag()
     }
-
-    override fun dependencies(): MutableList<String> {
-        return task.dependencies().apply {
-            if (contains(anchorTaskName)) return@apply
-            anchorTaskName ?: return@apply
-            if (!TextUtils.isEmpty(anchorTaskName)) {
-                add(anchorTaskName)
-            }
-        }
-    }
-
     override fun onTaskStart() {
         task.onTaskStart()
     }

@@ -29,6 +29,11 @@ internal class StartupTaskManager(executor: Executor? = null) {
                 if (it.await()) {
                     countDownLatch?.countDown()
                 }
+                result.forEach { task ->
+                    if (task is StartupAwaitTask) {
+                        task.dispatcher(it.tag())
+                    }
+                }
             }
         }
         try {
@@ -61,6 +66,9 @@ internal class StartupTaskManager(executor: Executor? = null) {
         }
         tasks.forEach { task ->
             val key = task.tag()
+            if (task is StartupAwaitTask) {
+                task.allTaskTag(taskTags)
+            }
             taskMap[key] = task
             val dependencies = task.dependencies().filter {
                 taskTags.contains(it)
