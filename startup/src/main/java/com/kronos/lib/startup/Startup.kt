@@ -40,18 +40,14 @@ class Startup private constructor(private val builder: Builder) {
         }
 
         fun addTask(task: StartupTask): Builder {
-            if (!tasks.contains(task)) {
-                tasks.add(task)
-            }
+            addStartTask(task)
             return this
         }
 
         fun addTaskGroup(group: StartupTaskGroup): Builder {
             val taskList = group.group().takeIf { it.isNotEmpty() } ?: return this
             taskList.forEach {
-                if (!tasks.contains(it)) {
-                    tasks.add(it)
-                }
+                addStartTask(it)
             }
             return this
         }
@@ -62,15 +58,23 @@ class Startup private constructor(private val builder: Builder) {
         }
 
         fun dependAnchorTask(task: StartupTask): Builder {
-            if (!tasks.contains(task)) {
-                tasks.add(AnchorTaskWrap(task, mTaskAnchor?.tag() ?: ""))
-            }
+            addStartTask(AnchorTaskWrap(task, mTaskAnchor?.tag() ?: ""))
             return this
         }
 
         fun setExecutor(executor: Executor): Builder {
             mExecutor = executor
             return this
+        }
+
+        private fun addStartTask(task: StartupTask) {
+            if (!tasks.contains(task)) {
+                if (!task.mainThread() && task.dependencies().size > 0) {
+                    tasks.add(StartupAwaitTask(task))
+                } else {
+                    tasks.add(task)
+                }
+            }
         }
 
         fun build(): Startup {
