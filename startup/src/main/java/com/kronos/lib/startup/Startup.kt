@@ -11,7 +11,7 @@ import java.util.concurrent.Executor
  *
  */
 
-internal const val TAG = "Startup"
+internal const val TAG = "--Startup--"
 
 class Startup private constructor(private val builder: Builder) {
 

@@ -2,7 +2,7 @@ package com.kronos.lib.startup
 
 import android.content.Context
 import android.os.SystemClock
-import android.util.Log
+import com.kronos.lib.startup.logger.KLogger
 import com.kronos.lib.startup.thread.StartUpThreadFactory
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -42,7 +42,7 @@ internal class StartupDispatcher(executor: Executor? = null) {
         task.onTaskCompleted()
         val duration = SystemClock.elapsedRealtime() - start
         val tag = task.tag().takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
-        Log.i(COAST_TAG, "$tag: task completed. cost: ${duration}ms")
+        KLogger.i(COAST_TAG, "$tag: task completed. cost: ${duration}ms")
         log(task, "task completed. cost: ${duration}ms")
         track(task, duration)
     }
