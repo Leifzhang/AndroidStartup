@@ -3,9 +3,14 @@ package com.kronos.startup.dag
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.kronos.lib.startup.data.StartupTaskData
+import com.kronos.startup.dag.adapter.DagViewAdapter
+import com.kronos.startup.dag.utils.dpToPx
 
 /**
  *
@@ -17,7 +22,14 @@ class StartupDagActivity : AppCompatActivity(R.layout.startup_activity_dag) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val data = intent.getParcelableArrayListExtra<StartupTaskData>(STARTUP_DATA)
+        val data =
+            intent.getParcelableArrayListExtra(STARTUP_DATA) ?: mutableListOf<StartupTaskData>()
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = DagViewAdapter(data)
+        recyclerView.addItemDecoration(DividerItemDecoration().apply {
+            setColorDrawable(Color.parseColor("#1482f0"), 1.dpToPx())
+        })
     }
 }
 

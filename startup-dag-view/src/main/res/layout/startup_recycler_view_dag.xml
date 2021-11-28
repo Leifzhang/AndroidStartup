@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="任务名:"
+            android:textColor="#1482f0" />
+
+        <TextView
+            android:id="@+id/taskNameTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:gravity="right"
+            tools:text="12345" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/messageTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        tools:text="12345" />
+
+    <LinearLayout
+        android:id="@+id/dependenciesLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="任务依赖:"
+            android:textColor="#1482f0" />
+
+        <TextView
+            android:id="@+id/dependenciesTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="12345" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/durationTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        tools:text="12345" />
+
+</LinearLayout>

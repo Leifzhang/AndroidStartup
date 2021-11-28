@@ -23,6 +23,8 @@ data class StartupTaskData(
         duration = SystemClock.elapsedRealtime() - taskStart
     }
 
+
+
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),
