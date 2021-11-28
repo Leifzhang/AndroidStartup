@@ -1,5 +1,7 @@
 package com.kronos.lib.startup
 
+import com.kronos.lib.startup.data.StartupTaskData
+
 /**
  *
  *  @Author LiABao
@@ -9,5 +11,7 @@ package com.kronos.lib.startup
 object StartupConfig {
 
     var debugMode = true
+
+    var onStartupFinishedListener: MutableList<StartupTaskData>.() -> Unit = {}
 
 }

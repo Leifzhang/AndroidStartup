@@ -1,6 +1,7 @@
 package com.kronos.lib.startup
 
 import android.content.Context
+import android.os.SystemClock
 import com.kronos.lib.startup.logger.KLogger
 import java.util.concurrent.CountDownLatch
 
@@ -17,12 +18,12 @@ class StartupAwaitTask(val task: StartupTask) : SimpleStartupTask() {
     private lateinit var rightDependencies: List<String>
 
     override fun run(context: Context) {
-        val timeUsage = System.currentTimeMillis()
+        val timeUsage = SystemClock.elapsedRealtime()
         KLogger.i(TAG, "taskName:${task.tag()} start await")
         countDownLatch.await()
         KLogger.i(
             TAG,
-            "taskName:${task.tag()}  await costa:${(System.currentTimeMillis() - timeUsage) / 1000} "
+            "taskName:${task.tag()}  await costa:${(SystemClock.elapsedRealtime() - timeUsage) / 1000} "
         )
         task.run(context)
     }

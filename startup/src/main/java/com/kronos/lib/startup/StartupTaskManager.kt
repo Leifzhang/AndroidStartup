@@ -2,6 +2,7 @@ package com.kronos.lib.startup
 
 import android.content.Context
 import android.os.SystemClock
+import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.lib.startup.logger.KLogger
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -14,9 +15,9 @@ import kotlin.collections.set
 
 internal class StartupTaskManager(executor: Executor? = null) {
 
-    private val dispatcher = StartupDispatcher(executor)
+    private val dispatcher = StartupDispatcher(executor, this)
     private var countDownLatch: CountDownLatch? = null
-
+    private val taskList = mutableListOf<StartupTaskData>()
 
     fun start(context: Context, tasks: List<StartupTask>) {
         val result = sort(tasks)
@@ -26,6 +27,8 @@ internal class StartupTaskManager(executor: Executor? = null) {
             KLogger.i(TAG, "need await count: $awaitCount")
         }
         for (task in result) {
+            val taskData = StartupTaskData(task.tag(), task.taskMessage(), task.dependencies())
+            taskList.add(taskData)
             dispatcher.dispatch(context, task) {
                 if (it.await()) {
                     countDownLatch?.countDown()
@@ -35,14 +38,19 @@ internal class StartupTaskManager(executor: Executor? = null) {
                         task.dispatcher(it.tag())
                     }
                 }
+                taskData.taskFinish()
+                KLogger.i(
+                    StartupDispatcher.COAST_TAG,
+                    "${taskData.taskName}: task completed. cost: ${taskData.duration}ms"
+                )
             }
         }
         try {
             val start = SystemClock.elapsedRealtime()
             countDownLatch?.await(2000, TimeUnit.MILLISECONDS)
             val duration = SystemClock.elapsedRealtime() - start
-            track("AwaitCountDown", duration)
             KLogger.i(TAG, "await cost: ${duration}ms")
+            StartupConfig.onStartupFinishedListener.invoke(taskList)
         } catch (e: Throwable) {
             KLogger.e(TAG, e.toString())
         }
@@ -131,11 +139,6 @@ private fun printTasks(tasks: List<StartupTask>) {
             .append(" | ")
     }
     KLogger.i(TAG, msg.toString())
-}
-
-fun log(task: StartupTask, msg: String) {
-    val tag = task.tag().takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
-    KLogger.i(TAG, "$tag: $msg")
 }
 
 fun StartupTask.string(): String {

@@ -47,6 +47,7 @@ dependencies {
         transitive = false
     }*/
     implementation project(':startup')
+    implementation project(':startup-dag-view')
     implementation project(':startup-annotation')
     ksp project(":startup-ksp-compiler")
     testImplementation 'junit:junit:4.+'

@@ -25,3 +25,12 @@ interface StartupTask {
 
     fun onTaskCompleted()
 }
+
+fun StartupTask.taskMessage(): String {
+    var message =
+        "isMainThread:${mainThread()}  isAwait:${await()}  "
+    if (this is StartupAwaitTask) {
+        //   message += ""
+    }
+    return message
+}

@@ -1,8 +1,6 @@
 package com.kronos.lib.startup
 
 import android.content.Context
-import android.os.SystemClock
-import com.kronos.lib.startup.logger.KLogger
 import com.kronos.lib.startup.thread.StartUpThreadFactory
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -14,7 +12,7 @@ import java.util.concurrent.Executors
  *
  */
 
-internal class StartupDispatcher(executor: Executor? = null) {
+internal class StartupDispatcher(executor: Executor? = null, val taskManager: StartupTaskManager) {
 
     private val mExecutor = executor ?: Executors.newFixedThreadPool(4, StartUpThreadFactory())
 
@@ -36,19 +34,12 @@ internal class StartupDispatcher(executor: Executor? = null) {
 
     private fun execute(context: Context, task: StartupTask) {
         task.onTaskStart()
-        log(task, "task start.")
-        val start = SystemClock.elapsedRealtime()
         task.run(context)
         task.onTaskCompleted()
-        val duration = SystemClock.elapsedRealtime() - start
-        val tag = task.tag().takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
-        KLogger.i(COAST_TAG, "$tag: task completed. cost: ${duration}ms")
-        log(task, "task completed. cost: ${duration}ms")
-        track(task, duration)
     }
 
     companion object {
-        private const val COAST_TAG = "Startup.Coast"
+        const val COAST_TAG = "Startup.Coast"
     }
 }
 
