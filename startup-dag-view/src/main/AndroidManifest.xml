@@ -4,5 +4,9 @@
 
     <application>
         <activity android:name=".StartupDagActivity" />
+        <provider
+            android:name="com.kronos.startup.dag.StartupDagInstallProvider"
+            android:authorities="${applicationId}.startup-dag-installer"
+            android:exported="false" />
     </application>
 </manifest>

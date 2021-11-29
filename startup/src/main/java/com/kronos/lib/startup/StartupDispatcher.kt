@@ -1,8 +1,9 @@
 package com.kronos.lib.startup
 
 import android.content.Context
+import com.kronos.lib.startup.logger.KLogger
 import com.kronos.lib.startup.thread.StartUpThreadFactory
-import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
@@ -12,7 +13,7 @@ import java.util.concurrent.Executors
  *
  */
 
-internal class StartupDispatcher(executor: Executor? = null, val taskManager: StartupTaskManager) {
+internal class StartupDispatcher(private val executor: ExecutorService? = null) {
 
     private val mExecutor = executor ?: Executors.newFixedThreadPool(4, StartUpThreadFactory())
 
@@ -37,6 +38,14 @@ internal class StartupDispatcher(executor: Executor? = null, val taskManager: St
         task.run(context)
         task.onTaskCompleted()
     }
+
+    fun dispatcherEnd() {
+        if (executor != mExecutor) {
+            KLogger.i(COAST_TAG, "auto shutdown default executor")
+            mExecutor.shutdown()
+        }
+    }
+
 
     companion object {
         const val COAST_TAG = "Startup.Coast"

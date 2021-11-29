@@ -6,19 +6,19 @@ import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.lib.startup.logger.KLogger
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
 
-internal class StartupTaskManager(executor: Executor? = null) {
+internal class StartupTaskManager(executor: ExecutorService? = null) {
 
-    private val dispatcher = StartupDispatcher(executor, this)
+    private val dispatcher = StartupDispatcher(executor)
     private var countDownLatch: CountDownLatch? = null
     private val taskList = mutableListOf<StartupTaskData>()
-
+    private val taskComplete = hashSetOf<String>()
     fun start(context: Context, tasks: List<StartupTask>) {
         val result = sort(tasks)
         val awaitCount = result.filter { it.await() }.size
@@ -30,19 +30,7 @@ internal class StartupTaskManager(executor: Executor? = null) {
             val taskData = StartupTaskData(task.tag(), task.taskMessage(), task.dependencies())
             taskList.add(taskData)
             dispatcher.dispatch(context, task) {
-                if (it.await()) {
-                    countDownLatch?.countDown()
-                }
-                result.forEach { task ->
-                    if (task is StartupAwaitTask) {
-                        task.dispatcher(it.tag())
-                    }
-                }
-                taskData.taskFinish()
-                KLogger.i(
-                    StartupDispatcher.COAST_TAG,
-                    "${taskData.taskName}: task completed. cost: ${taskData.duration}ms"
-                )
+                onTaskFinish(it, result, taskData)
             }
         }
         try {
@@ -50,14 +38,33 @@ internal class StartupTaskManager(executor: Executor? = null) {
             countDownLatch?.await(2000, TimeUnit.MILLISECONDS)
             val duration = SystemClock.elapsedRealtime() - start
             KLogger.i(TAG, "await cost: ${duration}ms")
-            StartupConfig.onStartupFinishedListener.invoke(taskList)
         } catch (e: Throwable) {
             KLogger.e(TAG, e.toString())
         }
     }
 
-
-
+    private fun onTaskFinish(
+        it: StartupTask, result: List<StartupTask>, taskData: StartupTaskData
+    ) {
+        if (it.await()) {
+            countDownLatch?.countDown()
+        }
+        result.forEach { task ->
+            if (task is StartupAwaitTask) {
+                task.dispatcher(it.tag())
+            }
+        }
+        taskData.taskFinish()
+        taskComplete.add(it.tag())
+        KLogger.i(
+            StartupDispatcher.COAST_TAG,
+            "${taskData.taskName}: task completed. cost: ${taskData.duration}ms"
+        )
+        if (taskComplete.size == result.size) {
+            StartupConfig.onStartupFinishedListener.invoke(taskList)
+            dispatcher.dispatcherEnd()
+        }
+    }
 
     /**
      * 拓扑排序
@@ -145,5 +152,5 @@ private fun printTasks(tasks: List<StartupTask>) {
 
 fun StartupTask.string(): String {
     val tag = tag().takeIf { it.isNotBlank() } ?: javaClass.simpleName
-    return "tag: $tag, mainThread: ${mainThread()}, await: ${await()}, dependencyCount: ${dependencies().size ?: 0}"
+    return "tag: $tag, mainThread: ${mainThread()}, await: ${await()}, dependencyCount: ${dependencies().size}"
 }
