@@ -12,56 +12,75 @@ import java.lang.Thread.sleep
  *  @Since 2021/11/26
  *
  */
-fun Application.create() {
+fun Application.createStartup(): Startup.Builder = run {
     startUp(this) {
-        addTask("taskA") {
-            info("taskA")
+        addTask {
+            simpleTask("taskA") {
+                info("taskA")
+            }
         }
-        addTask({
-            info("taskD")
-        }, {
-            tag = "taskD"
-            dependOn("taskC")
-        })
-        addTask("taskB") {
-            info("taskB")
+        addTask {
+            simpleTask("taskB") {
+                info("taskB")
+            }
+        }
+        addTask {
+            simpleTask("taskC") {
+                info("taskC")
+            }
+        }
+        addTask {
+            simpleTaskBuilder("taskD") {
+                info("taskD")
+            }.apply {
+                dependOn("taskC")
+            }.build()
         }
         addTask("taskC") {
             info("taskC")
         }
-        val anchorTask = MyAnchorTask()
-        addTask(anchorTask)
-        setTaskAnchor(anchorTask)
-        val task = asyncTask("asyncTaskA", {
-            info("asyncTaskA")
-        }, {
-            dependOn("asyncTaskD")
-        })
-        dependAnchorTask(task)
-        addTaskGroup(taskGroup())
-        dependAnchorTask(asyncTask("asyncTaskB", {
-            info("asyncTaskB")
-        }, {
-            dependOn("asyncTaskA")
-            await = true
-        }))
-        dependAnchorTask(asyncTask("asyncTaskC", {
-            info("asyncTaskC")
-            sleep(1000)
-        }, {
-            await = true
-            dependOn("asyncTaskE")
-        }))
-        dependAnchorTask(asyncTask("asyncTaskD", {
-            info("asyncTaskD")
-            sleep(1000)
-        }))
-        dependAnchorTask(asyncTask("asyncTaskE", {
-            info("asyncTaskE")
-            sleep(10000)
-        }))
-        addTaskGroup(StartupTaskGroupApplicationKsp())
-    }.build().start()
+        setAnchorTask {
+            MyAnchorTask()
+        }
+        addTask {
+            asyncTask("asyncTaskA", {
+                info("asyncTaskA")
+            }, {
+                dependOn("asyncTaskD")
+            })
+        }
+        addAnchorTask {
+            asyncTask("asyncTaskB", {
+                info("asyncTaskB")
+            }, {
+                dependOn("asyncTaskA")
+                await = true
+            })
+        }
+        addAnchorTask {
+            asyncTaskBuilder("asyncTaskC") {
+                info("asyncTaskC")
+                sleep(1000)
+            }.apply {
+                await = true
+                dependOn("asyncTaskE")
+            }.build()
+        }
+        addAnchorTask {
+            asyncTask("asyncTaskD") {
+                info("asyncTaskD")
+                sleep(1000)
+            }
+        }
+        addAnchorTask {
+            asyncTask("asyncTaskE") {
+                info("asyncTaskE")
+                sleep(10000)
+            }
+        }
+        addTaskGroup { taskGroup() }
+        addTaskGroup { StartupTaskGroupApplicationKsp() }
+    }
 }
 
 // 启动任务组

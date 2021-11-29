@@ -80,20 +80,80 @@ addTaskGroup(StartupTaskGroupApplicationKsp())
 
 通过dsl形式动态添加task
 
-
 构造startup builder ，之后添加任务。 这部分主要就是因为需要构造较多的task函数，看起来不立体了。
 
+以下是dsl版本参考，能力是将简单的任务可以通过dsl的形式添加进去。
+
 ```kotlin
- startUp(this) {
-    addTask("taskA") {
-        info("taskA")
+fun Application.createStartup(): Startup.Builder = run {
+    startUp(this) {
+        addTask {
+            simpleTask("taskA") {
+                info("taskA")
+            }
+        }
+        addTask {
+            simpleTask("taskB") {
+                info("taskB")
+            }
+        }
+        addTask {
+            simpleTask("taskC") {
+                info("taskC")
+            }
+        }
+        addTask {
+            simpleTaskBuilder("taskD") {
+                info("taskD")
+            }.apply {
+                dependOn("taskC")
+            }.build()
+        }
+        addTask("taskC") {
+            info("taskC")
+        }
+        setAnchorTask {
+            MyAnchorTask()
+        }
+        addTask {
+            asyncTask("asyncTaskA", {
+                info("asyncTaskA")
+            }, {
+                dependOn("asyncTaskD")
+            })
+        }
+        addAnchorTask {
+            asyncTask("asyncTaskB", {
+                info("asyncTaskB")
+            }, {
+                dependOn("asyncTaskA")
+                await = true
+            })
+        }
+        addAnchorTask {
+            asyncTaskBuilder("asyncTaskC") {
+                info("asyncTaskC")
+                sleep(1000)
+            }.apply {
+                await = true
+                dependOn("asyncTaskE")
+            }.build()
+        }
+        addAnchorTask {
+            asyncTask("asyncTaskD") {
+                info("asyncTaskD")
+                sleep(1000)
+            }
+        }
+        addAnchorTask {
+            asyncTask("asyncTaskE") {
+                info("asyncTaskE")
+                sleep(10000)
+            }
+        }
+        addTaskGroup { taskGroup() }
+        addTaskGroup { StartupTaskGroupApplicationKsp() }
     }
-    addTask({
-        info("taskD")
-    }, {
-        tag = "taskD"
-        dependOn("taskC")
-    })
 }
 ```
 

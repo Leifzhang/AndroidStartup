@@ -8,6 +8,7 @@ import android.content.Context
  *  @Since 2021/9/3
  *
  */
+@StartUpDsl
 class TaskBuilder(val runnable: (Context) -> Unit = {}) {
 
     val dependOnTasks = mutableListOf<String>()
@@ -30,7 +31,7 @@ class TaskBuilder(val runnable: (Context) -> Unit = {}) {
 
 }
 
-
+@StartUpDsl
 private class SimpleBuilderTask(private val builder: TaskBuilder) : SimpleStartupTask() {
 
     override fun run(context: Context) {
