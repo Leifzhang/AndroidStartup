@@ -5,7 +5,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Origin
-import com.kronos.startup.annotation.Startup
+import com.kronos.startup.annotation.StartupGroup
 import com.squareup.kotlinpoet.ClassName
 
 class StartupProcessor(
@@ -24,9 +24,9 @@ class StartupProcessor(
         }
         logger.info("StartupProcessor start")
 
-        val symbols = resolver.getSymbolsWithAnnotation(Startup::class.java.name)
+        val symbols = resolver.getSymbolsWithAnnotation(StartupGroup::class.java.name)
         startupType = resolver.getClassDeclarationByName(
-            resolver.getKSNameFromString(Startup::class.java.name)
+            resolver.getKSNameFromString(StartupGroup::class.java.name)
         )?.asType() ?: kotlin.run {
             logger.error("JsonClass type not found on the classpath.")
             return emptyList()

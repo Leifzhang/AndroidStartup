@@ -43,11 +43,13 @@ fun Application.create() {
             info("asyncTaskB")
         }, {
             dependOn("asyncTaskA")
+            await = true
         }))
         dependAnchorTask(asyncTask("asyncTaskC", {
             info("asyncTaskC")
             sleep(1000)
         }, {
+            await = true
             dependOn("asyncTaskE")
         }))
         dependAnchorTask(asyncTask("asyncTaskD", {

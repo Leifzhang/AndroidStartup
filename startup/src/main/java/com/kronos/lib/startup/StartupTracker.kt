@@ -9,16 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 
 private val reportMap: MutableMap<String, String> = ConcurrentHashMap()
-internal fun track(task: StartupTask, duration: Long) {
-    reportMap[getTag(task)] = duration.toString()
-}
 
 internal fun track(taskName: String, duration: Long) {
     reportMap[taskName] = duration.toString()
-}
-
-
-
-private fun getTag(task: StartupTask): String {
-    return task.tag().takeIf { it.isNotEmpty() } ?: task.javaClass.simpleName
 }

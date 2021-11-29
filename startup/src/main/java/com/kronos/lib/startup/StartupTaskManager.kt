@@ -2,57 +2,75 @@ package com.kronos.lib.startup
 
 import android.content.Context
 import android.os.SystemClock
-import android.util.Log
+import com.kronos.lib.startup.data.StartupTaskData
+import com.kronos.lib.startup.logger.KLogger
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
 
-internal class StartupTaskManager(executor: Executor? = null) {
+internal class StartupTaskManager(executor: ExecutorService? = null) {
 
     private val dispatcher = StartupDispatcher(executor)
     private var countDownLatch: CountDownLatch? = null
-
+    private val taskList = mutableListOf<StartupTaskData>()
+    private val taskComplete = hashSetOf<String>()
     fun start(context: Context, tasks: List<StartupTask>) {
         val result = sort(tasks)
         val awaitCount = result.filter { it.await() }.size
         if (awaitCount > 0) {
             countDownLatch = CountDownLatch(awaitCount)
-            Log.i(TAG, "need await count: $awaitCount")
+            KLogger.i(TAG, "need await count: $awaitCount")
         }
         for (task in result) {
+            val taskData = StartupTaskData(task.tag(), task.taskMessage(), task.dependencies())
+            taskList.add(taskData)
             dispatcher.dispatch(context, task) {
-                if (it.await()) {
-                    countDownLatch?.countDown()
-                }
-                result.forEach { task ->
-                    if (task is StartupAwaitTask) {
-                        task.dispatcher(it.tag())
-                    }
-                }
+                onTaskFinish(it, result, taskData)
             }
         }
         try {
             val start = SystemClock.elapsedRealtime()
             countDownLatch?.await(2000, TimeUnit.MILLISECONDS)
             val duration = SystemClock.elapsedRealtime() - start
-            track("AwaitCountDown", duration)
-            Log.i(TAG, "await cost: ${duration}ms")
+            KLogger.i(TAG, "await cost: ${duration}ms")
         } catch (e: Throwable) {
-            Log.e(TAG, e.toString())
+            KLogger.e(TAG, e.toString())
         }
     }
 
+    private fun onTaskFinish(
+        it: StartupTask, result: List<StartupTask>, taskData: StartupTaskData
+    ) {
+        if (it.await()) {
+            countDownLatch?.countDown()
+        }
+        result.forEach { task ->
+            if (task is StartupAwaitTask) {
+                task.dispatcher(it.tag())
+            }
+        }
+        taskData.taskFinish()
+        taskComplete.add(it.tag())
+        KLogger.i(
+            StartupDispatcher.COAST_TAG,
+            "${taskData.taskName}: task completed. cost: ${taskData.duration}ms"
+        )
+        if (taskComplete.size == result.size) {
+            StartupConfig.onStartupFinishedListener.invoke(taskList)
+            dispatcher.dispatcherEnd()
+        }
+    }
 
     /**
      * 拓扑排序
      */
     private fun sort(tasks: List<StartupTask>): List<StartupTask> {
-        Log.i(TAG, "origin tasks:")
+        KLogger.i(TAG, "origin tasks:")
         printTasks(tasks)
         val result: MutableList<StartupTask> = ArrayList()
         val taskTags = hashSetOf<String>()
@@ -71,7 +89,11 @@ internal class StartupTaskManager(executor: Executor? = null) {
             }
             taskMap[key] = task
             val dependencies = task.dependencies().filter {
-                taskTags.contains(it)
+                val contains = taskTags.contains(it)
+                if (!contains) {
+                    KLogger.w(TAG, "this  task :$it is illegal in dependencies")
+                }
+                contains
             }
             val inDegree = dependencies.size
             inDegreeMap[key] = inDegree
@@ -113,7 +135,7 @@ internal class StartupTaskManager(executor: Executor? = null) {
         if (result.size != tasks.size) {
             throw IllegalArgumentException("Start up dependencies must be cycle or leak.")
         }
-        Log.i(TAG, "sorted tasks: ")
+        KLogger.i(TAG, "sorted tasks: ")
         printTasks(result)
         return result
     }
@@ -125,15 +147,10 @@ private fun printTasks(tasks: List<StartupTask>) {
         msg.append(it.string())
             .append(" | ")
     }
-    Log.i(TAG, msg.toString())
-}
-
-fun log(task: StartupTask, msg: String) {
-    val tag = task.tag().takeIf { it.isNotBlank() } ?: task.javaClass.simpleName
-    Log.i(TAG, "$tag: $msg")
+    KLogger.i(TAG, msg.toString())
 }
 
 fun StartupTask.string(): String {
     val tag = tag().takeIf { it.isNotBlank() } ?: javaClass.simpleName
-    return "tag: $tag, mainThread: ${mainThread()}, await: ${await()}, dependencyCount: ${dependencies().size ?: 0}"
+    return "tag: $tag, mainThread: ${mainThread()}, await: ${await()}, dependencyCount: ${dependencies().size}"
 }

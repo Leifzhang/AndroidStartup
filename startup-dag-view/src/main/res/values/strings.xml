@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <bool name="startup_install_provider_enable">true</bool>
+</resources>
