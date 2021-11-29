@@ -25,7 +25,7 @@ class Startup private constructor(private val builder: Builder) {
         }
     }
 
-
+    @StartUpDsl
     class Builder {
 
         val tasks: MutableList<StartupTask> = ArrayList()

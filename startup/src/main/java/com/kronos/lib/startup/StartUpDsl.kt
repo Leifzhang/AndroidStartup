@@ -11,30 +11,66 @@ import android.content.Context
  */
 
 
+@StartUpDsl
 fun startUp(context: Application, invoke: Startup.Builder.() -> Unit): Startup.Builder =
     Startup.newBuilder().attach(context).apply(invoke)
+
+fun Startup.Builder.addTaskGroup(builder: () -> StartupTaskGroup) =
+    run { addTaskGroup(builder.invoke()) }
+
+fun Startup.Builder.addTask(builder: () -> StartupTask) =
+    run { addTask(builder.invoke()) }
+
+fun Startup.Builder.setAnchorTask(builder: () -> StartupTask) =
+    kotlin.run {
+        val task = builder.invoke()
+        addTask(task)
+        setTaskAnchor(task)
+    }
+
+fun Startup.Builder.addAnchorTask(builder: () -> StartupTask) =
+    run { dependAnchorTask(builder.invoke()) }
 
 
 fun Startup.Builder.addTask(name: String, runnable: (Context) -> Unit) =
     run { addTask(simpleTask(name, runnable)) }
 
-
-fun Startup.Builder.addTask(runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit) =
-    run { addTask(task(runnable, builder)) }
-
-
-fun Startup.Builder.addAsyncTask(
-    name: String,
-    runnable: (Context) -> Unit,
-    builder: TaskBuilder.() -> Unit = {}
-) = run {
-    addTask(asyncTask(name, runnable, builder))
-}
-
+@StartUpDsl
 fun simpleTask(name: String, runnable: (Context) -> Unit) =
-    TaskBuilder(runnable).apply { tag = name }.build()
+    TaskBuilder(runnable).apply {
+        tag = name
+    }.build()
+
+@StartUpDsl
+fun simpleTaskBuilder(name: String, runnable: (Context) -> Unit): TaskBuilder =
+    TaskBuilder(runnable).apply {
+        tag = name
+    }
+
+@StartUpDsl
+fun simpleTask(name: String, runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit = {}) =
+    TaskBuilder(runnable).apply {
+        tag = name
+        builder.invoke(this)
+    }.build()
 
 
+@StartUpDsl
+fun asyncTaskBuilder(name: String, runnable: (Context) -> Unit): TaskBuilder =
+    TaskBuilder(runnable).apply {
+        tag = name
+        mainThread = false
+    }
+
+
+@StartUpDsl
+fun asyncTask(name: String, runnable: (Context) -> Unit) =
+    TaskBuilder(runnable).apply {
+        tag = name
+        mainThread = false
+    }.build()
+
+@StartUpDsl
 fun asyncTask(name: String, runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit = {}) =
     TaskBuilder(runnable).apply {
         tag = name
@@ -42,8 +78,12 @@ fun asyncTask(name: String, runnable: (Context) -> Unit, builder: TaskBuilder.()
         builder.invoke(this)
     }.build()
 
-fun simpleTask(runnable: (Context) -> Unit) =
-    TaskBuilder(runnable).build()
+/*fun simpleTask(runnable: (Context) -> Unit) =
+    TaskBuilder(runnable).build()*/
 
+@StartUpDsl
 fun task(runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit = {}) =
     TaskBuilder(runnable).apply(builder).build()
+
+@DslMarker
+annotation class StartUpDsl
