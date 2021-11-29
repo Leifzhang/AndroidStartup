@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">sample</string>
+    <!--可以通过这个设置主动关闭调试功能-->
+    <bool name="startup_install_provider_enable">true</bool>
 </resources>

@@ -6,5 +6,5 @@ package com.kronos.startup.annotation
     AnnotationTarget.CLASS
 )
 @Retention
-annotation class Startup(val group: String) {
+annotation class StartupGroup(val group: String) {
 }

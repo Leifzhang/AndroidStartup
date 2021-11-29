@@ -7,6 +7,7 @@
         <provider
             android:name="com.kronos.startup.dag.StartupDagInstallProvider"
             android:authorities="${applicationId}.startup-dag-installer"
+            android:enabled="@bool/startup_install_provider_enable"
             android:exported="false" />
     </application>
 </manifest>
