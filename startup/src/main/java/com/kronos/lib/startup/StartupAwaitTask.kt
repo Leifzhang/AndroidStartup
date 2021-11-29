@@ -63,6 +63,10 @@ class StartupAwaitTask(val task: StartupTask) : SimpleStartupTask() {
         task.onTaskCompleted()
     }
 
+    override fun toString(): String {
+        return task.toString()
+    }
+
     companion object {
         const val TAG = "StartupAwaitTask"
     }

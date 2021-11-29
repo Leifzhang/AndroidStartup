@@ -36,9 +36,6 @@ fun Application.createStartup(): Startup.Builder = run {
                 dependOn("taskC")
             }.build()
         }
-        addTask("taskC") {
-            info("taskC")
-        }
         setAnchorTask {
             MyAnchorTask()
         }
