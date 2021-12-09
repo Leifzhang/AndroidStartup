@@ -3,12 +3,12 @@
     package="com.kronos.android.startup.sample">
 
     <application
+        android:name=".SampleApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".SampleApplication"
         android:theme="@style/Theme.AndroidStartUp">
         <activity
             android:name=".MainActivity"
@@ -18,6 +18,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".WebActivity"
+            android:process=":web">
+
         </activity>
     </application>
 

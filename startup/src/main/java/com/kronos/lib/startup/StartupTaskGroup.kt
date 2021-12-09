@@ -11,6 +11,9 @@ interface StartupTaskGroup {
     fun group(): MutableList<StartupTask>
 }
 
+interface StartupTaskProcessGroup {
+    fun group(process: String): MutableList<StartupTask>
+}
 
 fun startupTaskGroup(lambda: MutableList<StartupTask>.() -> Unit): StartupTaskGroup {
     val startupTaskGroup = object : StartupTaskGroup {

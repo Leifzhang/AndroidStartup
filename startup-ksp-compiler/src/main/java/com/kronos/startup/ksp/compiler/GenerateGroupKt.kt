@@ -9,7 +9,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
  * @Author LiABao
  * @Since 2021/11/26
  */
-class GenerateKt(
+class GenerateGroupKt(
     name: String,
     private val codeGenerator: CodeGenerator
 ) {

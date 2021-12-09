@@ -1,8 +1,12 @@
 # AndroidStartUp
 
-  玩具工程
+玩具工程
 
-  想优化下项目内的启动框架，还是基于有向无环图将任务排序。之后拆分多线程等待执行任务，保证所有初始化任务能够有序的执行，不产生由于别的sdk没有初始化导致的错乱问题。
+想优化下项目内的启动框架，还是基于有向无环图将任务排序。之后拆分多线程等待执行任务，保证所有初始化任务能够有序的执行，不产生由于别的sdk没有初始化导致的错乱问题。
+
+因为原来的项目是多进程，所以考虑给多进程解耦，开发了一套ksp的注解生成分组逻辑。不同进程可以生成不同的任务分组逻辑。
+
+同时增加锚点逻辑，让任务链可以更便捷的添加。
 
 # 依赖tag化
 
@@ -42,7 +46,8 @@ dependencies {
 
 ```
 
-2.  创建一个任务并添加注解
+2. 创建一个任务并添加注解
+
 ```kotlin
 @StartupGroup(group = "ksp")
 class AsyncTask1 : SimpleStartupTask() {
@@ -61,19 +66,74 @@ class AsyncTask1 : SimpleStartupTask() {
 }
 ```
 
+考虑到多进程，每个进程启动的任务不同的情况下需要对任务进行额外分组，下面demo为指定web进程的任务。获取注解方式大部分基于反射实现，属于合规的放心使用。
+
+```kotlin
+@StartupGroup(group = "ksp", strategy = Process.OTHER, processName = ["web"])
+class SimpleTask3 : SimpleStartupTask() {
+
+    override fun run(context: Context) {
+        info("SimpleTask3")
+    }
+}
+
+addMainProcTaskGroup { StartupTaskGroupApplicationKspAll() }
+```
+
+指定主进程任务
+
+```kotlin
+@StartupGroup(group = "ksp", strategy = Process.MAIN)
+class SimpleTask2 : SimpleStartupTask() {
+
+    override fun run(context: Context) {
+        info("SimpleTask2")
+    }
+
+}
+```
+
 3. 添加组，该产物会存在在`build/generated/ksp`文件路径下，并根据group和moduleName等作为唯一类名。
 
 ```kotlin
-public class StartupTaskGroupApplicationKsp : StartupTaskGroup {
-  public override fun group(): MutableList<StartupTask> {
-    val list = mutableListOf<StartupTask>()
-    list.add(AsyncTask1())
-    list.add(SimpleTask1())
-    return list
-  }
+public class StartupTaskGroupApplicationKspAll : StartupTaskGroup {
+    public override fun group(): MutableList<StartupTask> {
+        val list = mutableListOf<StartupTask>()
+        list.add(AsyncTask1())
+        list.add(SimpleTask1())
+        return list
+    }
 }
 
-addTaskGroup(StartupTaskGroupApplicationKsp())
+addTaskGroup(StartupTaskGroupApplicationKspAll())
+```
+
+主进程任务组
+
+```kotlin
+public class StartupTaskGroupApplicationKspMain : StartupTaskGroup {
+    public override fun group(): MutableList<StartupTask> {
+        val list = mutableListOf<StartupTask>()
+        list.add(SimpleTask2())
+        return list
+    }
+}
+
+```
+
+子进程taskGroup
+
+```kotlin
+public class StartupProcTaskGroupApplicationKsp : StartupTaskProcessGroup {
+    public override fun group(process: String): MutableList<StartupTask> {
+        val list = mutableListOf<StartupTask>()
+        if (process.contains("web")) {
+            list.add(SimpleTask3())
+        }
+        return list
+    }
+}
+
 ```
 
 # dsl
@@ -152,9 +212,34 @@ fun Application.createStartup(): Startup.Builder = run {
             }
         }
         addTaskGroup { taskGroup() }
-        addTaskGroup { StartupTaskGroupApplicationKsp() }
+        addTaskGroup { StartupTaskGroupApplicationKspMain() }
+        addMainProcTaskGroup { StartupTaskGroupApplicationKspAll() }
+        addProcTaskGroup { StartupProcTaskGroupApplicationKsp() }
     }
 }
+```
+
+# 锚点任务组
+
+等项目稳定之后，会设立几个锚点任务，后续任务只要挂载到锚点任务之后执行即可，可以简单的设立任务基准。
+
+1.添加锚点任务
+
+```kotlin
+buildAnchorTask {
+    MyAnchorTask()
+}
+```
+
+2. 挂载mustAfter 
+
+```kotlin
+ mustAfterAnchor {
+            asyncTask("asyncTaskE") {
+                info("asyncTaskE")
+                sleep(10000)
+            }
+        }
 ```
 
 # 调试能力
@@ -171,8 +256,8 @@ dependencies {
 
 > 小贴士 不想要该功能则只需 在values下配置如下
 
-
 ```xml
+
 <bool name="startup_install_provider_enable">false</bool>
 ```
 
@@ -180,6 +265,9 @@ dependencies {
 
 通过ksp 生成一部分动态的组，这部分暂时只能手动添加，后续考虑优先梳理依赖，但是并没有完全完成解耦。
 
+# TODO
+
+任务防止劣化的调试工具没有完成。
 
 # 玩具属性
 

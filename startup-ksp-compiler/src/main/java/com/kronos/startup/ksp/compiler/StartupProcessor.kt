@@ -16,7 +16,8 @@ class StartupProcessor(
     private lateinit var startupType: KSType
     private var isload = false
     private val taskGroupMap = hashMapOf<String, MutableList<ClassName>>()
-
+    private val procTaskGroupMap =
+        hashMapOf<String, MutableList<Pair<ClassName, ArrayList<String>>>>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if (isload) {
@@ -38,12 +39,22 @@ class StartupProcessor(
         try {
             isload = true
             taskGroupMap.forEach { it ->
-                val generateKt = GenerateKt(
+                val generateKt = GenerateGroupKt(
                     "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
                     codeGenerator
                 )
                 it.value.forEach { className ->
                     generateKt.addStatement(className)
+                }
+                generateKt.generateKt()
+            }
+            procTaskGroupMap.forEach {
+                val generateKt = GenerateProcGroupKt(
+                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
+                    codeGenerator
+                )
+                it.value.forEach { pair ->
+                    generateKt.addStatement(pair.first, pair.second)
                 }
                 generateKt.generateKt()
             }
@@ -66,14 +77,35 @@ class StartupProcessor(
 
         val routerAnnotation = type.findAnnotationWithType(startupType) ?: return
         val groupName = routerAnnotation.getMember<String>("group")
-        if (taskGroupMap[groupName] == null) {
-            taskGroupMap[groupName] = mutableListOf()
+        val strategy = routerAnnotation.arguments.firstOrNull {
+            it.name?.asString() == "strategy"
+        }?.value.toString().toValue() ?: return
+        if (strategy.equals("other", true)) {
+            val key = groupName
+            if (procTaskGroupMap[key] == null) {
+                procTaskGroupMap[key] = mutableListOf()
+            }
+            val list = procTaskGroupMap[key] ?: return
+            list.add(type.toClassName() to (routerAnnotation.getMember("processName")))
+        } else {
+            val key = "${groupName}${strategy}"
+            if (taskGroupMap[key] == null) {
+                taskGroupMap[key] = mutableListOf()
+            }
+            val list = taskGroupMap[key] ?: return
+            list.add(type.toClassName())
         }
-        val list = taskGroupMap[groupName] ?: return
-        list.add(type.toClassName())
     }
 
+    private fun String.toValue(): String {
+        var lastIndex = lastIndexOf(".") + 1
+        if (lastIndex <= 0) {
+            lastIndex = 0
+        }
+        return subSequence(lastIndex, length).toString().lowercase().upCaseKeyFirstChar()
+    }
 }
+
 
 class StartupProcessorProvider : SymbolProcessorProvider {
     override fun create(

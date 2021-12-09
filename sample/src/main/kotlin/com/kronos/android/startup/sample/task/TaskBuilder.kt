@@ -3,7 +3,9 @@ package com.kronos.android.startup.sample.task
 import android.app.Application
 import android.util.Log
 import com.kronos.lib.startup.*
-import com.kronos.lib.startup.group.StartupTaskGroupApplicationKsp
+import com.kronos.lib.startup.group.StartupProcTaskGroupApplicationKsp
+import com.kronos.lib.startup.group.StartupTaskGroupApplicationKspAll
+import com.kronos.lib.startup.group.StartupTaskGroupApplicationKspMain
 import java.lang.Thread.sleep
 
 /**
@@ -36,7 +38,7 @@ fun Application.createStartup(): Startup.Builder = run {
                 dependOn("taskC")
             }.build()
         }
-        setAnchorTask {
+        buildAnchorTask {
             MyAnchorTask()
         }
         addTask {
@@ -46,7 +48,7 @@ fun Application.createStartup(): Startup.Builder = run {
                 dependOn("asyncTaskD")
             })
         }
-        addAnchorTask {
+        mustAfterAnchor {
             asyncTask("asyncTaskB", {
                 info("asyncTaskB")
             }, {
@@ -54,7 +56,7 @@ fun Application.createStartup(): Startup.Builder = run {
                 await = true
             })
         }
-        addAnchorTask {
+        mustAfterAnchor {
             asyncTaskBuilder("asyncTaskC") {
                 info("asyncTaskC")
                 sleep(1000)
@@ -63,20 +65,22 @@ fun Application.createStartup(): Startup.Builder = run {
                 dependOn("asyncTaskE")
             }.build()
         }
-        addAnchorTask {
+        mustAfterAnchor {
             asyncTask("asyncTaskD") {
                 info("asyncTaskD")
                 sleep(1000)
             }
         }
-        addAnchorTask {
+        mustAfterAnchor {
             asyncTask("asyncTaskE") {
                 info("asyncTaskE")
                 sleep(10000)
             }
         }
         addTaskGroup { taskGroup() }
-        addTaskGroup { StartupTaskGroupApplicationKsp() }
+        addTaskGroup { StartupTaskGroupApplicationKspMain() }
+        addMainProcTaskGroup { StartupTaskGroupApplicationKspAll() }
+        addProcTaskGroup { StartupProcTaskGroupApplicationKsp() }
     }
 }
 
