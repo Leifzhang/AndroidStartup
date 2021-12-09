@@ -88,10 +88,11 @@ class StartupProcessor(
             val list = procTaskGroupMap[key] ?: return
             list.add(type.toClassName() to (routerAnnotation.getMember("processName")))
         } else {
-            if (taskGroupMap[groupName] == null) {
-                taskGroupMap[groupName] = mutableListOf()
+            val key = "${groupName}${strategy}"
+            if (taskGroupMap[key] == null) {
+                taskGroupMap[key] = mutableListOf()
             }
-            val list = taskGroupMap[groupName] ?: return
+            val list = taskGroupMap[key] ?: return
             list.add(type.toClassName())
         }
     }

@@ -2,6 +2,7 @@ package com.kronos.lib.startup
 
 import android.app.Application
 import com.kronos.lib.startup.utils.ProcessUtils
+import com.kronos.lib.startup.utils.isMainProc
 import java.util.*
 import java.util.concurrent.ExecutorService
 
@@ -54,18 +55,31 @@ class Startup private constructor(private val builder: Builder) {
             return this
         }
 
-
-        fun addProcTaskGroup(group: StartupTaskProcessGroup): Builder {
-            val taskList = group.group(processName ?: "").takeIf { it.isNotEmpty() } ?: return this
+        fun addMainProcTaskGroup(group: StartupTaskGroup): Builder {
+            if (app.isMainProc(processName)) {
+                val taskList = group.group().takeIf { it.isNotEmpty() } ?: return this
+                taskList.forEach {
+                    addStartTask(it)
+                }
+            }
             return this
         }
 
-        fun setTaskAnchor(taskAnchor: StartupTask): Builder {
+
+        fun addProcTaskGroup(group: StartupTaskProcessGroup): Builder {
+            val taskList = group.group(processName ?: "").takeIf { it.isNotEmpty() } ?: return this
+            taskList.forEach {
+                addStartTask(it)
+            }
+            return this
+        }
+
+        fun addTaskAnchor(taskAnchor: StartupTask): Builder {
             anchorTasks.add(taskAnchor)
             return this
         }
 
-        fun dependAnchorTask(task: StartupTask): Builder {
+        fun mustAfterAnchorTask(task: StartupTask): Builder {
             addStartTask(AnchorTaskWrap(task, anchorTasks))
             return this
         }

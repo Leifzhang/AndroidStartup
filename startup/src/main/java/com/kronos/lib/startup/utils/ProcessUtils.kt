@@ -18,7 +18,7 @@ import java.io.FileReader
  */
 object ProcessUtils {
 
-   private var procName: String? = null
+    private var procName: String? = null
 
     var application: Context? = null
 
@@ -153,4 +153,9 @@ object ProcessUtils {
         return null
     }
 
+}
+
+
+fun Context.isMainProc(proc: String?): Boolean {
+    return packageName == proc
 }

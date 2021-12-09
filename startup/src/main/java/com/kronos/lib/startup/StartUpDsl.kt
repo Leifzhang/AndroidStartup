@@ -16,6 +16,10 @@ fun startUp(context: Application, invoke: Startup.Builder.() -> Unit): Startup.B
     Startup.newBuilder(context).apply(invoke)
 
 @StartUpDsl
+fun Startup.Builder.addMainProcTaskGroup(builder: () -> StartupTaskGroup) =
+    run { addMainProcTaskGroup(builder.invoke()) }
+
+@StartUpDsl
 fun Startup.Builder.addTaskGroup(builder: () -> StartupTaskGroup) =
     run { addTaskGroup(builder.invoke()) }
 
@@ -28,17 +32,19 @@ fun Startup.Builder.addTask(builder: () -> StartupTask) =
     run { addTask(builder.invoke()) }
 
 @StartUpDsl
-fun Startup.Builder.mustAfterAnchor(builder: () -> StartupTask) =
+fun Startup.Builder.buildAnchorTask(builder: () -> StartupTask) =
     kotlin.run {
         val task = builder.invoke()
         addTask(task)
-        setTaskAnchor(task)
+        addTaskAnchor(task)
     }
 
-fun Startup.Builder.addAnchorTask(builder: () -> StartupTask) =
-    run { dependAnchorTask(builder.invoke()) }
+@StartUpDsl
+fun Startup.Builder.mustAfterAnchor(builder: () -> StartupTask) =
+    run { mustAfterAnchorTask(builder.invoke()) }
 
 
+@StartUpDsl
 fun Startup.Builder.addTask(name: String, runnable: (Context) -> Unit) =
     run { addTask(simpleTask(name, runnable)) }
 

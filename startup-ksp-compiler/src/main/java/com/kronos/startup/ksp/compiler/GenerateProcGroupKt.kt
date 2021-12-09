@@ -29,7 +29,7 @@ class GenerateProcGroupKt(
 
     fun addStatement(className: ClassName, processes: ArrayList<String>) {
         processes.forEach {
-            groupFun.beginControlFlow("if(%S==process)", it)
+            groupFun.beginControlFlow("if(process.contains(%S))", it)
             groupFun.addStatement("list.add(%T())", className)
             groupFun.endControlFlow()
         }
