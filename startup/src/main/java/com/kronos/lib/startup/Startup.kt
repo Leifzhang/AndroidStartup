@@ -1,6 +1,7 @@
 package com.kronos.lib.startup
 
 import android.app.Application
+import com.kronos.lib.startup.utils.ProcessUtils
 import java.util.*
 import java.util.concurrent.ExecutorService
 
@@ -20,23 +21,24 @@ class Startup private constructor(private val builder: Builder) {
 
     companion object {
         @JvmStatic
-        fun newBuilder(): Builder {
-            return Builder()
+        fun newBuilder(app: Application): Builder {
+            return Builder(app)
         }
     }
 
     @StartUpDsl
-    class Builder {
+    class Builder(val app: Application) {
 
         val tasks: MutableList<StartupTask> = ArrayList()
-        var app: Application? = null
-        private var mTaskAnchor: StartupTask? = null
+        private val processName by lazy {
+            ProcessUtils.myProcName()
+        }
+
+        private val anchorTasks = mutableListOf<StartupTask>()
         internal var mExecutor: ExecutorService? = null
 
-
-        fun attach(app: Application): Builder {
-            this.app = app
-            return this
+        init {
+            ProcessUtils.application = app
         }
 
         fun addTask(task: StartupTask): Builder {
@@ -52,13 +54,19 @@ class Startup private constructor(private val builder: Builder) {
             return this
         }
 
+
+        fun addProcTaskGroup(group: StartupTaskProcessGroup): Builder {
+            val taskList = group.group(processName ?: "").takeIf { it.isNotEmpty() } ?: return this
+            return this
+        }
+
         fun setTaskAnchor(taskAnchor: StartupTask): Builder {
-            mTaskAnchor = taskAnchor
+            anchorTasks.add(taskAnchor)
             return this
         }
 
         fun dependAnchorTask(task: StartupTask): Builder {
-            addStartTask(AnchorTaskWrap(task, mTaskAnchor?.tag() ?: ""))
+            addStartTask(AnchorTaskWrap(task, anchorTasks))
             return this
         }
 
@@ -83,10 +91,7 @@ class Startup private constructor(private val builder: Builder) {
     }
 
     fun start() {
-        if (builder.app == null) {
-            return
-        }
-        manager.start(builder.app!!.applicationContext, builder.tasks)
+        manager.start(builder.app.applicationContext, builder.tasks)
     }
 
 }

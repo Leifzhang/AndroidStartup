@@ -6,5 +6,8 @@ package com.kronos.startup.annotation
     AnnotationTarget.CLASS
 )
 @Retention
-annotation class StartupGroup(val group: String) {
-}
+annotation class StartupGroup(
+    val group: String,
+    val strategy: Process = Process.ALL,
+    val processName: Array<String> = []
+)

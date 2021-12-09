@@ -3,6 +3,7 @@ package com.kronos.android.startup.sample.task
 import android.app.Application
 import android.util.Log
 import com.kronos.lib.startup.*
+import com.kronos.lib.startup.group.StartupProcTaskGroupApplicationKsp
 import com.kronos.lib.startup.group.StartupTaskGroupApplicationKsp
 import java.lang.Thread.sleep
 
@@ -36,7 +37,7 @@ fun Application.createStartup(): Startup.Builder = run {
                 dependOn("taskC")
             }.build()
         }
-        setAnchorTask {
+        mustAfterAnchor {
             MyAnchorTask()
         }
         addTask {
@@ -77,6 +78,7 @@ fun Application.createStartup(): Startup.Builder = run {
         }
         addTaskGroup { taskGroup() }
         addTaskGroup { StartupTaskGroupApplicationKsp() }
+        addProcTaskGroup { StartupProcTaskGroupApplicationKsp() }
     }
 }
 

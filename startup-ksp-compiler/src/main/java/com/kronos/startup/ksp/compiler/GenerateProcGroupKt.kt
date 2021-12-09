@@ -6,25 +6,34 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 /**
- * @Author LiABao
- * @Since 2021/11/26
+ *
+ *  @Author LiABao
+ *  @Since 2021/12/9
+ *
  */
-class GenerateKt(
+class GenerateProcGroupKt(
     name: String,
     private val codeGenerator: CodeGenerator
 ) {
 
-    private val className = "StartupTaskGroup${name.replace("[^0-9a-zA-Z_]+", "")}"
+    private val className = "StartupProcTaskGroup${name.replace("[^0-9a-zA-Z_]+", "")}"
     private val specBuilder = FileSpec.builder("com.kronos.lib.startup.group", className)
     private val groupFun: FunSpec.Builder = FunSpec.builder("group").apply {
         addModifiers(KModifier.OVERRIDE)
+        addParameter("process", String::class)
         val className = ClassName("com.kronos.lib.startup", "StartupTask")
         returns(MUTABLE_LIST.parameterizedBy(className))
         addStatement("val list = mutableListOf<StartupTask>()")
     }
 
-    fun addStatement(className: ClassName) {
-        groupFun.addStatement("list.add(%T())", className)
+
+    fun addStatement(className: ClassName, processes: ArrayList<String>) {
+        processes.forEach {
+            groupFun.beginControlFlow("if(%S==process)", it)
+            groupFun.addStatement("list.add(%T())", className)
+            groupFun.endControlFlow()
+        }
+
     }
 
     fun generateKt() {
@@ -33,7 +42,7 @@ class GenerateKt(
             .addSuperinterface(
                 ClassName(
                     "com.kronos.lib.startup",
-                    "StartupTaskGroup"
+                    "StartupTaskProcessGroup"
                 )
             )
             .addFunction(groupFun.build())

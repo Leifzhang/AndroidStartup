@@ -13,15 +13,22 @@ import android.content.Context
 
 @StartUpDsl
 fun startUp(context: Application, invoke: Startup.Builder.() -> Unit): Startup.Builder =
-    Startup.newBuilder().attach(context).apply(invoke)
+    Startup.newBuilder(context).apply(invoke)
 
+@StartUpDsl
 fun Startup.Builder.addTaskGroup(builder: () -> StartupTaskGroup) =
     run { addTaskGroup(builder.invoke()) }
 
+@StartUpDsl
+fun Startup.Builder.addProcTaskGroup(builder: () -> StartupTaskProcessGroup) =
+    run { addProcTaskGroup(builder.invoke()) }
+
+@StartUpDsl
 fun Startup.Builder.addTask(builder: () -> StartupTask) =
     run { addTask(builder.invoke()) }
 
-fun Startup.Builder.setAnchorTask(builder: () -> StartupTask) =
+@StartUpDsl
+fun Startup.Builder.mustAfterAnchor(builder: () -> StartupTask) =
     kotlin.run {
         val task = builder.invoke()
         addTask(task)
@@ -77,9 +84,6 @@ fun asyncTask(name: String, runnable: (Context) -> Unit, builder: TaskBuilder.()
         mainThread = false
         builder.invoke(this)
     }.build()
-
-/*fun simpleTask(runnable: (Context) -> Unit) =
-    TaskBuilder(runnable).build()*/
 
 @StartUpDsl
 fun task(runnable: (Context) -> Unit, builder: TaskBuilder.() -> Unit = {}) =

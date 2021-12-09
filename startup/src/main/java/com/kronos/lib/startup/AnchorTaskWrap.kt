@@ -11,17 +11,19 @@ import android.text.TextUtils
  */
 class AnchorTaskWrap(
     private val task: StartupTask,
-    private val anchorTaskName: String?
+    private val anchorTaskName: MutableList<StartupTask>
 ) : StartupTask {
-
 
     override fun dependencies(): MutableList<String> {
         return task.dependencies().apply {
-            if (contains(anchorTaskName)) return@apply
-            anchorTaskName ?: return@apply
-            if (!TextUtils.isEmpty(anchorTaskName)) {
-                add(anchorTaskName)
+            anchorTaskName.forEach {
+                val taskName = it.tag()
+                if (contains(taskName)) return@apply
+                if (!TextUtils.isEmpty(taskName)) {
+                    add(taskName)
+                }
             }
+
         }
     }
 
