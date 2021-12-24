@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.startup.dag.adapter.DagViewAdapter
+import com.kronos.startup.dag.utils.classify
 import com.kronos.startup.dag.utils.dpToPx
 
 /**
@@ -24,9 +25,10 @@ class StartupDagActivity : AppCompatActivity(R.layout.startup_activity_dag) {
         super.onCreate(savedInstanceState)
         val data =
             intent.getParcelableArrayListExtra(STARTUP_DATA) ?: mutableListOf<StartupTaskData>()
+        val map = data.classify()
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = DagViewAdapter(data)
+        recyclerView.adapter = DagViewAdapter(map)
         recyclerView.addItemDecoration(DividerItemDecoration().apply {
             setColorDrawable(Color.parseColor("#1482f0"), 1.dpToPx())
         })

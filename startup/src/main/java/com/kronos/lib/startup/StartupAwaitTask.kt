@@ -16,14 +16,14 @@ class StartupAwaitTask(val task: StartupTask) : SimpleStartupTask() {
     private var dependencies = task.dependencies()
     private lateinit var countDownLatch: CountDownLatch
     private lateinit var rightDependencies: List<String>
+    var awaitDuration: Long = 0
 
     override fun run(context: Context) {
         val timeUsage = SystemClock.elapsedRealtime()
-        KLogger.i(TAG, "taskName:${task.tag()} start await")
         countDownLatch.await()
+        awaitDuration = (SystemClock.elapsedRealtime() - timeUsage) / 1000
         KLogger.i(
-            TAG,
-            "taskName:${task.tag()}  await costa:${(SystemClock.elapsedRealtime() - timeUsage) / 1000} "
+            TAG, "taskName:${task.tag()}  await costa:${awaitDuration} "
         )
         task.run(context)
     }

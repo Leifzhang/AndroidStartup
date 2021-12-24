@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.startup.dag.R
+import com.kronos.startup.dag.data.ThreadTaskData
 import com.kronos.startup.dag.utils.gone
 import com.kronos.startup.dag.utils.visible
 
@@ -17,7 +17,7 @@ import com.kronos.startup.dag.utils.visible
  *  @Since 2021/11/29
  *
  */
-class DagViewAdapter(private val list: MutableList<StartupTaskData>) :
+class DagViewAdapter(private val list: MutableList<ThreadTaskData>) :
     RecyclerView.Adapter<DagViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DagViewHolder {
         return DagViewHolder(
@@ -43,7 +43,8 @@ class DagViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val durationTv: TextView = view.findViewById(R.id.durationTv)
     private val dependenciesLayout: LinearLayout = view.findViewById(R.id.dependenciesLayout)
 
-    fun bindView(data: StartupTaskData) {
+    fun bindView(taskData: ThreadTaskData) {
+        val data = taskData.mainTaskData
         taskNameTv.text = data.taskName?.getSimpleTaskName()
         messageTv.text = data.message
         if (data.dependencies.isNotEmpty()) {
