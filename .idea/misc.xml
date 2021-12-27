@@ -8,6 +8,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_dag.xml" value="0.20153985507246377" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_header.xml" value="0.14764492753623187" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_thread_name.xml" value="0.14764492753623187" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_thread_task.xml" value="0.14764492753623187" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_time_line.xml" value="0.14764492753623187" />
       </map>
     </option>
   </component>

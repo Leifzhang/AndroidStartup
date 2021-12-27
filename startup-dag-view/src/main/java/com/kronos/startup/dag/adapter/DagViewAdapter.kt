@@ -5,10 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kronos.startup.dag.R
 import com.kronos.startup.dag.data.ThreadTaskData
 import com.kronos.startup.dag.utils.gone
+import com.kronos.startup.dag.utils.threadSet
 import com.kronos.startup.dag.utils.visible
 
 /**
@@ -42,6 +44,16 @@ class DagViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val dependenciesTv: TextView = view.findViewById(R.id.dependenciesTv)
     private val durationTv: TextView = view.findViewById(R.id.durationTv)
     private val dependenciesLayout: LinearLayout = view.findViewById(R.id.dependenciesLayout)
+    private val startTaskTv: TextView = view.findViewById(R.id.startTaskTv)
+    private val endTaskTv: TextView = view.findViewById(R.id.endTaskTv)
+    private val taskGridLayout: RecyclerView = view.findViewById(R.id.taskGridLayout)
+    private val adapter = EachThreadAdapter()
+
+    init {
+        val size = threadSet.size
+        taskGridLayout.layoutManager = GridLayoutManager(view.context, size)
+        taskGridLayout.adapter = adapter
+    }
 
     fun bindView(taskData: ThreadTaskData) {
         val data = taskData.mainTaskData
@@ -59,7 +71,22 @@ class DagViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         } else {
             dependenciesLayout.gone()
         }
+        val info = taskData.getStartTaskInfo()
+        if (info.isNotEmpty()) {
+            startTaskTv.visible()
+            startTaskTv.text = info
+        } else {
+            startTaskTv.gone()
+        }
+        val endInfo = taskData.getEndTaskInfo()
+        if (endInfo.isNotEmpty()) {
+            endTaskTv.visible()
+            endTaskTv.text = endInfo
+        } else {
+            endTaskTv.gone()
+        }
         durationTv.text = getDurationText(data.duration)
+        adapter.taskData = taskData
     }
 
     private fun getDurationText(duration: Long): String {

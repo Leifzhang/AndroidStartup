@@ -35,6 +35,9 @@ fun List<StartupTaskData>.classifyByTaskName(
     var lastThreadTaskData: ThreadTaskData? = null
     val childThreads = CopyOnWriteArrayList<StartupTaskData>()
     forEach {
+        if (!threadSet.contains(it.threadName)) {
+            threadSet.add(it.threadName ?: "")
+        }
         if (it.threadName.equals(name)) {
             lastThreadTaskData = ThreadTaskData(it)
             taskDataList.add(lastThreadTaskData!!)
@@ -55,4 +58,19 @@ fun <K, V> MutableMap<K, V>.getValueByDefault(key: K, function: () -> V): V {
         this[key] = function.invoke()
     }
     return requireNotNull(this[key])
+}
+
+
+internal val threadSet by lazy {
+    mutableListOf<String>()
+}
+
+
+fun String.getSimpleName(): String {
+    val index = lastIndexOf(".")
+    return if (index <= 0 || index == length) {
+        this
+    } else {
+        substring(index + 1)
+    }
 }

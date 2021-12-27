@@ -9,7 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kronos.lib.startup.data.StartupTaskData
-import com.kronos.startup.dag.adapter.DagViewAdapter
+import com.kronos.startup.dag.adapter.HeaderAdapter
+import com.kronos.startup.dag.adapter.TimeLineAdapter
+import com.kronos.startup.dag.utils.builderConcatAdapter
 import com.kronos.startup.dag.utils.classify
 import com.kronos.startup.dag.utils.dpToPx
 
@@ -28,7 +30,10 @@ class StartupDagActivity : AppCompatActivity(R.layout.startup_activity_dag) {
         val map = data.classify()
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = DagViewAdapter(map)
+        recyclerView.adapter = builderConcatAdapter {
+            add(HeaderAdapter())
+            add(TimeLineAdapter(map))
+        }
         recyclerView.addItemDecoration(DividerItemDecoration().apply {
             setColorDrawable(Color.parseColor("#1482f0"), 1.dpToPx())
         })
