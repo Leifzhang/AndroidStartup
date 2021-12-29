@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kronos.startup.dag.R
 import com.kronos.startup.dag.utils.getSimpleName
 import com.kronos.startup.dag.utils.threadSet
+import com.kronos.startup.dag.widget.AdapterScrollerView
+import com.kronos.startup.dag.widget.CustomizeScrollView
+import com.kronos.startup.dag.widget.getRecyclerView
 
 /**
  *
@@ -21,7 +24,7 @@ class HeaderAdapter : RecyclerView.Adapter<HeaderViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HeaderViewHolder {
         return HeaderViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.startup_recycler_view_header, parent, false)
+                .inflate(R.layout.startup_recycler_view_header, parent, false), parent
         )
     }
 
@@ -34,14 +37,20 @@ class HeaderAdapter : RecyclerView.Adapter<HeaderViewHolder>() {
     }
 }
 
-class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class HeaderViewHolder(view: View, parent: ViewGroup) : RecyclerView.ViewHolder(view),
+    AdapterScrollerView {
     private val taskGridLayout: RecyclerView = view.findViewById(R.id.taskGridLayout)
     private val adapter = ThreadNameAdapter()
+    private val scrollerView = view.findViewById<CustomizeScrollView>(R.id.scrollerView)
 
     init {
         val size = threadSet.size
         taskGridLayout.layoutManager = GridLayoutManager(view.context, size)
         taskGridLayout.adapter = adapter
+        val recyclerView = parent.getRecyclerView()
+        recyclerView?.apply {
+            scrollerView.attachToRecyclerView(this)
+        }
     }
 
 
@@ -72,6 +81,10 @@ class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindThreadName(name: String) {
             threadNameTv.text = name.getSimpleName()
         }
+    }
+
+    override fun getView(): CustomizeScrollView {
+        return scrollerView
     }
 
 }

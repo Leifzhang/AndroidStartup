@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kronos.startup.dag.R
 import com.kronos.startup.dag.data.ThreadTaskData
 import com.kronos.startup.dag.utils.threadSet
+import com.kronos.startup.dag.widget.AdapterScrollerView
+import com.kronos.startup.dag.widget.CustomizeScrollView
+import com.kronos.startup.dag.widget.getRecyclerView
 
 /**
  *
@@ -21,7 +24,7 @@ class TimeLineAdapter(private val list: MutableList<ThreadTaskData>) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeLineViewHolder {
         return TimeLineViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.startup_recycler_view_time_line, parent, false)
+                .inflate(R.layout.startup_recycler_view_time_line, parent, false), parent
         )
     }
 
@@ -29,22 +32,26 @@ class TimeLineAdapter(private val list: MutableList<ThreadTaskData>) :
         holder.bindView(list[position])
     }
 
-
     override fun getItemCount(): Int {
         return list.size
     }
 }
 
 
-class TimeLineViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class TimeLineViewHolder(view: View, private val parent: ViewGroup) : RecyclerView.ViewHolder(view),
+    AdapterScrollerView {
 
     private val taskGridLayout: RecyclerView = view.findViewById(R.id.taskGridLayout)
+    private val customScrollView: CustomizeScrollView = view.findViewById(R.id.customScrollView)
     private val adapter = EachThreadAdapter()
 
     init {
         val size = threadSet.size
         taskGridLayout.layoutManager = GridLayoutManager(view.context, size)
-
+        val recyclerView = parent.getRecyclerView()
+        recyclerView?.apply {
+            customScrollView.attachToRecyclerView(this)
+        }
     }
 
     fun bindView(taskData: ThreadTaskData) {
@@ -58,5 +65,9 @@ class TimeLineViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             return this
         }
         return substring(lastIndex)
+    }
+
+    override fun getView(): CustomizeScrollView {
+        return customScrollView
     }
 }

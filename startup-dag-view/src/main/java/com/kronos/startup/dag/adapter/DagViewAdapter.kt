@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kronos.startup.dag.R
 import com.kronos.startup.dag.data.ThreadTaskData
-import com.kronos.startup.dag.utils.gone
 import com.kronos.startup.dag.utils.threadSet
-import com.kronos.startup.dag.utils.visible
+import com.kronos.startup.dag.widget.gone
+import com.kronos.startup.dag.widget.visible
 
 /**
  *

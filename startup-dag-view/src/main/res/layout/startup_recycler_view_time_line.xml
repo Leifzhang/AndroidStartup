@@ -11,11 +11,25 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:text="任务开始"
-        android:layout_height="wrap_content" />
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/taskGridLayout"
+        android:layout_height="wrap_content"
+        android:text="任务开始" />
+
+    <com.kronos.startup.dag.widget.CustomizeScrollView
+        android:id="@+id/customScrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/taskGridLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+    </com.kronos.startup.dag.widget.CustomizeScrollView>
 
 </LinearLayout>

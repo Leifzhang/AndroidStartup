@@ -74,15 +74,3 @@ private fun getStatusBarHeight(context: Context): Int {
     }
     return result
 }
-
-internal fun View.visible() {
-    visibility = View.VISIBLE
-}
-
-internal fun View.gone() {
-    visibility = View.GONE
-}
-
-internal fun View.isVisible(): Boolean {
-    return visibility == View.VISIBLE
-}
