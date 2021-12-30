@@ -24,7 +24,7 @@ class DagViewAdapter(private val list: MutableList<ThreadTaskData>) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DagViewHolder {
         return DagViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.startup_recycler_view_dag, parent, false)
+                .inflate(R.layout.startup_recycler_view_time_line, parent, false)
         )
     }
 

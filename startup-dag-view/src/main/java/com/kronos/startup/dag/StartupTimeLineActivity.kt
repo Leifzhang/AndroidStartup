@@ -21,7 +21,7 @@ import com.kronos.startup.dag.utils.dpToPx
  *  @Since 2021/11/28
  *
  */
-class StartupDagActivity : AppCompatActivity(R.layout.startup_activity_dag) {
+class StartupTimeLineActivity : AppCompatActivity(R.layout.startup_activity_dag_time_line) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +42,7 @@ class StartupDagActivity : AppCompatActivity(R.layout.startup_activity_dag) {
 
 
 fun Context.startupDagActivity(data: MutableList<StartupTaskData>) {
-    val intent = Intent(this, StartupDagActivity::class.java)
+    val intent = Intent(this, StartupTimeLineActivity::class.java)
     if (this !is Activity) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
