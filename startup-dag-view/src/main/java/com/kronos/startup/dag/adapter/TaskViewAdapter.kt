@@ -45,7 +45,7 @@ class DagViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         durationTv.text = getDurationText(data.average())
         val message =
-            "isMain:${data.threadName.isMainThread()}  isHistory:${data.date == getDayFormat()}"
+            "isMain:${data.threadName.isMainThread()}  isHistory:${data.date != getDayFormat()}"
         messageTv.text = message
     }
 

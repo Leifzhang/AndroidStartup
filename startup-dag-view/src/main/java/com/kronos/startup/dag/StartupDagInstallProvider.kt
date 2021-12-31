@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 import com.kronos.lib.startup.StartupConfig
+import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.startup.dag.sql.StartupDatabaseHelper
 import com.kronos.startup.dag.sql.getPath
 import com.kronos.startup.dag.sql.onTaskAdd
@@ -38,10 +39,11 @@ class StartupDagInstallProvider : ContentProvider() {
                     data.updateHashCode()
                     dao.updateInfo(data)
                 }
-                postUI {
-                    context?.startTaskDurationActivity()
-                }
+                startupList.addAll(this)
                 this.onTaskAdd()
+                postUI {
+                    context?.startDagMainActivity()
+                }
             }
         }
         return true
@@ -81,5 +83,6 @@ class StartupDagInstallProvider : ContentProvider() {
     companion object {
         val formatKey by lazy { getDateFormat() }
         var versionCode = 0L
+        internal val startupList = mutableListOf<StartupTaskData>()
     }
 }

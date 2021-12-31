@@ -3,10 +3,10 @@
     package="com.kronos.startup.dag">
 
     <application>
-
+        <activity android:name=".StartupMainDebugActivity" />
         <activity android:name=".StartupTimeLineActivity" />
         <activity android:name=".StartupDagPathActivity" />
-        <activity android:name=".StartupTaskDurationActivity"/>
+        <activity android:name=".StartupTaskDurationActivity" />
 
         <provider
             android:name="com.kronos.startup.dag.StartupDagInstallProvider"

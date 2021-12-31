@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kronos.lib.startup.data.StartupTaskData
+import com.kronos.startup.dag.StartupDagInstallProvider.Companion.startupList
 import com.kronos.startup.dag.adapter.HeaderAdapter
 import com.kronos.startup.dag.adapter.TimeLineAdapter
 import com.kronos.startup.dag.utils.builderConcatAdapter
@@ -41,12 +42,12 @@ class StartupTimeLineActivity : AppCompatActivity(R.layout.startup_activity_dag_
 }
 
 
-fun Context.startupDagActivity(data: MutableList<StartupTaskData>) {
+fun Context.startupTimeLineActivity() {
     val intent = Intent(this, StartupTimeLineActivity::class.java)
     if (this !is Activity) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    intent.putParcelableArrayListExtra(STARTUP_DATA, data.toArrayList())
+    intent.putParcelableArrayListExtra(STARTUP_DATA, startupList.toArrayList())
     startActivity(intent)
 }
 
