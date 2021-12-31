@@ -5,6 +5,15 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 import com.kronos.lib.startup.StartupConfig
+import com.kronos.lib.startup.data.StartupTaskData
+import com.kronos.startup.dag.sql.StartupDatabaseHelper
+import com.kronos.startup.dag.sql.getPath
+import com.kronos.startup.dag.sql.onTaskAdd
+import com.kronos.startup.dag.sql.transform
+import com.kronos.startup.dag.utils.getDateFormat
+import com.kronos.startup.dag.utils.getVersionCode
+import com.kronos.startup.dag.utils.postUI
+import kotlin.concurrent.thread
 
 /**
  *
@@ -13,9 +22,29 @@ import com.kronos.lib.startup.StartupConfig
  *
  */
 class StartupDagInstallProvider : ContentProvider() {
+
     override fun onCreate(): Boolean {
+        context?.let { StartupDatabaseHelper.init(it) }
+        versionCode = context.getVersionCode()
         StartupConfig.onStartupFinishedListener = {
-            context?.startupDagActivity(this)
+            thread {
+                val dao = StartupDatabaseHelper.databaseInstance.startupDao()
+                var data = dao.getStartupPathInfo(formatKey)
+                if (data == null) {
+                    data = this.transform(formatKey)
+                    dao.insertInfo(data)
+                } else {
+                    val path = getPath()
+                    data.dagPath?.addAll(path)
+                    data.updateHashCode()
+                    dao.updateInfo(data)
+                }
+                startupList.addAll(this)
+                this.onTaskAdd()
+                postUI {
+                    context?.startDagMainActivity()
+                }
+            }
         }
         return true
     }
@@ -49,5 +78,11 @@ class StartupDagInstallProvider : ContentProvider() {
         selectionArgs: Array<out String>?
     ): Int {
         return 0
+    }
+
+    companion object {
+        val formatKey by lazy { getDateFormat() }
+        var versionCode = 0L
+        internal val startupList = mutableListOf<StartupTaskData>()
     }
 }

@@ -34,7 +34,7 @@
         android:padding="5dp"
         tools:text="12345" />
 
-    <LinearLayout
+    <!--<LinearLayout
         android:id="@+id/dependenciesLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="12345" />
-    </LinearLayout>
+    </LinearLayout>-->
 
     <TextView
         android:id="@+id/durationTv"

@@ -3,13 +3,12 @@ package com.kronos.startup.dag.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.startup.dag.R
-import com.kronos.startup.dag.utils.gone
-import com.kronos.startup.dag.utils.visible
+import com.kronos.startup.dag.sql.StartTaskInfo
+import com.kronos.startup.dag.sql.isMainThread
+import com.kronos.startup.dag.utils.getDayFormat
 
 /**
  *
@@ -17,12 +16,12 @@ import com.kronos.startup.dag.utils.visible
  *  @Since 2021/11/29
  *
  */
-class DagViewAdapter(private val list: MutableList<StartupTaskData>) :
+class TaskViewAdapter(private val list: MutableList<StartTaskInfo>) :
     RecyclerView.Adapter<DagViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DagViewHolder {
         return DagViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.startup_recycler_view_dag, parent, false)
+                .inflate(R.layout.startup_recycler_view_task_duration, parent, false)
         )
     }
 
@@ -38,27 +37,16 @@ class DagViewAdapter(private val list: MutableList<StartupTaskData>) :
 class DagViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private val taskNameTv: TextView = view.findViewById(R.id.taskNameTv)
-    private val messageTv: TextView = view.findViewById(R.id.messageTv)
-    private val dependenciesTv: TextView = view.findViewById(R.id.dependenciesTv)
     private val durationTv: TextView = view.findViewById(R.id.durationTv)
-    private val dependenciesLayout: LinearLayout = view.findViewById(R.id.dependenciesLayout)
+    private val messageTv: TextView = view.findViewById(R.id.messageTv)
 
-    fun bindView(data: StartupTaskData) {
+    fun bindView(data: StartTaskInfo) {
         taskNameTv.text = data.taskName?.getSimpleTaskName()
-        messageTv.text = data.message
-        if (data.dependencies.isNotEmpty()) {
-            dependenciesLayout.visible()
-            val stringBuilder = StringBuilder()
-            stringBuilder.append("[")
-            data.dependencies.forEach {
-                stringBuilder.append(it.getSimpleTaskName()).append(",")
-            }
-            stringBuilder.append("]")
-            dependenciesTv.text = stringBuilder.toString()
-        } else {
-            dependenciesLayout.gone()
-        }
-        durationTv.text = getDurationText(data.duration)
+
+        durationTv.text = getDurationText(data.average())
+        val message =
+            "isMain:${data.threadName.isMainThread()}  isHistory:${data.date != getDayFormat()}"
+        messageTv.text = message
     }
 
     private fun getDurationText(duration: Long): String {

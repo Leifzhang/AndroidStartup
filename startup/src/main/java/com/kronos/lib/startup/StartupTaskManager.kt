@@ -19,6 +19,7 @@ internal class StartupTaskManager(executor: ExecutorService? = null) {
     private var countDownLatch: CountDownLatch? = null
     private val taskList = mutableListOf<StartupTaskData>()
     private val taskComplete = hashSetOf<String>()
+
     fun start(context: Context, tasks: List<StartupTask>) {
         val result = sort(tasks)
         val awaitCount = result.filter { it.await() }.size
@@ -27,7 +28,8 @@ internal class StartupTaskManager(executor: ExecutorService? = null) {
             KLogger.i(TAG, "need await count: $awaitCount")
         }
         for (task in result) {
-            val taskData = StartupTaskData(task.tag(), task.taskMessage(), task.dependencies())
+            val taskData =
+                StartupTaskData(task.tag(), task.taskMessage(), dependencies = task.dependencies())
             taskList.add(taskData)
             dispatcher.dispatch(context, task) {
                 onTaskFinish(it, result, taskData)
@@ -54,7 +56,7 @@ internal class StartupTaskManager(executor: ExecutorService? = null) {
                 task.dispatcher(it.tag())
             }
         }
-        taskData.taskFinish()
+        taskData.taskFinish(it)
         taskComplete.add(it.tag())
         KLogger.i(
             StartupDispatcher.COAST_TAG,

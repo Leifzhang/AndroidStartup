@@ -3,7 +3,11 @@
     package="com.kronos.startup.dag">
 
     <application>
-        <activity android:name=".StartupDagActivity" />
+        <activity android:name=".StartupMainDebugActivity" />
+        <activity android:name=".StartupTimeLineActivity" />
+        <activity android:name=".StartupDagPathActivity" />
+        <activity android:name=".StartupTaskDurationActivity" />
+
         <provider
             android:name="com.kronos.startup.dag.StartupDagInstallProvider"
             android:authorities="${applicationId}.startup-dag-installer"

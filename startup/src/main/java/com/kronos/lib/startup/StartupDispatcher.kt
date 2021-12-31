@@ -41,14 +41,14 @@ internal class StartupDispatcher(private val executor: ExecutorService? = null) 
 
     fun dispatcherEnd() {
         if (executor != mExecutor) {
-            KLogger.i(COAST_TAG, "auto shutdown default executor")
+            KLogger.i(TAG, "auto shutdown default executor")
             mExecutor.shutdown()
         }
     }
 
 
     companion object {
-        const val COAST_TAG = "Startup.Coast"
+        const val COAST_TAG = "--Startup.Coast--"
     }
 }
 

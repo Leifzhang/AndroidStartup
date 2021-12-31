@@ -25,4 +25,10 @@ class AsyncTask1 : SimpleStartupTask() {
     override fun run(context: Context) {
         info("AsyncTask1")
     }
+
+    override fun dependencies(): MutableList<String> {
+        return super.dependencies().apply {
+
+        }
+    }
 }

@@ -20,9 +20,6 @@ class StartupProcessor(
         hashMapOf<String, MutableList<Pair<ClassName, ArrayList<String>>>>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        if (isload) {
-            return emptyList()
-        }
         logger.info("StartupProcessor start")
 
         val symbols = resolver.getSymbolsWithAnnotation(StartupGroup::class.java.name)
@@ -34,34 +31,6 @@ class StartupProcessor(
         }
         symbols.asSequence().forEach {
             add(it)
-        }
-        // logger.error("className:${moduleName}")
-        try {
-            isload = true
-            taskGroupMap.forEach { it ->
-                val generateKt = GenerateGroupKt(
-                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
-                    codeGenerator
-                )
-                it.value.forEach { className ->
-                    generateKt.addStatement(className)
-                }
-                generateKt.generateKt()
-            }
-            procTaskGroupMap.forEach {
-                val generateKt = GenerateProcGroupKt(
-                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
-                    codeGenerator
-                )
-                it.value.forEach { pair ->
-                    generateKt.addStatement(pair.first, pair.second)
-                }
-                generateKt.generateKt()
-            }
-        } catch (e: Exception) {
-            logger.error(
-                "Error preparing :" + " ${e.stackTrace.joinToString("\n")}"
-            )
         }
         return emptyList()
     }
@@ -103,6 +72,37 @@ class StartupProcessor(
             lastIndex = 0
         }
         return subSequence(lastIndex, length).toString().lowercase().upCaseKeyFirstChar()
+    }
+
+    override fun finish() {
+        super.finish()
+        // logger.error("className:${moduleName}")
+        try {
+            taskGroupMap.forEach { it ->
+                val generateKt = GenerateGroupKt(
+                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
+                    codeGenerator
+                )
+                it.value.forEach { className ->
+                    generateKt.addStatement(className)
+                }
+                generateKt.generateKt()
+            }
+            procTaskGroupMap.forEach {
+                val generateKt = GenerateProcGroupKt(
+                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
+                    codeGenerator
+                )
+                it.value.forEach { pair ->
+                    generateKt.addStatement(pair.first, pair.second)
+                }
+                generateKt.generateKt()
+            }
+        } catch (e: Exception) {
+            logger.error(
+                "Error preparing :" + " ${e.stackTrace.joinToString("\n")}"
+            )
+        }
     }
 }
 

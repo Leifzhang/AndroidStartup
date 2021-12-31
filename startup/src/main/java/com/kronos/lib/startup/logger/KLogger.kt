@@ -15,27 +15,27 @@ object KLogger {
 
         override fun v(tag: String, msg: String, vararg obj: Any?) {
             val log = if (obj.isEmpty()) msg else String.format(msg, *obj)
-            Log.v(tag, log)
+            Log.v(tag, log.appendThreadName())
         }
 
         override fun i(tag: String, msg: String, vararg obj: Any?) {
             val log = if (obj.isEmpty()) msg else String.format(msg, *obj)
-            Log.i(tag, log)
+            Log.i(tag, log.appendThreadName())
         }
 
         override fun d(tag: String, msg: String, vararg obj: Any?) {
             val log = if (obj.isEmpty()) msg else String.format(msg, *obj)
-            Log.d(tag, log)
+            Log.d(tag, log.appendThreadName())
         }
 
         override fun w(tag: String, msg: String, vararg obj: Any?) {
             val log = if (obj.isEmpty()) msg else String.format(msg, *obj)
-            Log.w(tag, log)
+            Log.w(tag, log.appendThreadName())
         }
 
         override fun e(tag: String, msg: String, vararg obj: Any?) {
             val log = if (obj.isEmpty()) msg else String.format(msg, *obj)
-            Log.e(tag, log)
+            Log.e(tag, log.appendThreadName())
         }
 
         override fun printErrStackTrace(
@@ -49,7 +49,7 @@ object KLogger {
                 log = ""
             }
             log += "  " + Log.getStackTraceString(tr)
-            Log.e(tag, log)
+            Log.e(tag, log.appendThreadName())
         }
     }
     var impl: KLoggerImp = debugLog
@@ -108,4 +108,9 @@ object KLogger {
         fun e(tag: String, msg: String, vararg obj: Any?)
         fun printErrStackTrace(tag: String, tr: Throwable?, format: String?, vararg obj: Any?)
     }
+}
+
+fun String.appendThreadName(): String {
+    val threadName = Thread.currentThread().name
+    return "[threadName:$threadName] [message:$this]"
 }

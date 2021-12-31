@@ -7,7 +7,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../layout/custom_preview.xml" value="0.1425925925925926" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_activity_dag_path.xml" value="0.1644021739130435" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_activity_main_debug.xml" value="0.1" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_activity_task_duration.xml" value="0.15896739130434784" />
         <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_dag.xml" value="0.20153985507246377" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_header.xml" value="0.14764492753623187" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_task.xml" value="0.15896739130434784" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_thread_name.xml" value="0.14764492753623187" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_thread_task.xml" value="0.14764492753623187" />
+        <entry key="startup-dag-view/src/main/res/layout/startup_recycler_view_time_line.xml" value="0.14764492753623187" />
       </map>
     </option>
   </component>
