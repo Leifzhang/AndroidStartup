@@ -21,8 +21,8 @@ class TaskBuilder(val runnable: (Context) -> Unit = {}) {
         dependOnTasks.add(task)
     }
 
-    fun build(): SimpleStartupTask {
-        return SimpleBuilderTask(this)
+    fun build(): StartupTask {
+        return BuilderTask(this)
     }
 
     override fun toString(): String {
@@ -32,7 +32,7 @@ class TaskBuilder(val runnable: (Context) -> Unit = {}) {
 }
 
 @StartUpDsl
-private class SimpleBuilderTask(private val builder: TaskBuilder) : SimpleStartupTask() {
+private class BuilderTask(private val builder: TaskBuilder) : StartupTask {
 
     override fun run(context: Context) {
         builder.runnable.invoke(context)
@@ -52,6 +52,14 @@ private class SimpleBuilderTask(private val builder: TaskBuilder) : SimpleStartu
 
     override fun tag(): String {
         return builder.tag ?: tag()
+    }
+
+    override fun onTaskStart() {
+
+    }
+
+    override fun onTaskCompleted() {
+
     }
 
     override fun toString(): String {

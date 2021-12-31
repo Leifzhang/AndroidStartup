@@ -77,7 +77,7 @@ fun Application.createStartup(): Startup.Builder = run {
                 sleep(10000)
             }
         }
-        //  addTaskGroup { taskGroup() }
+        addTaskGroup { taskGroup() }
         addTaskGroup { StartupTaskGroupApplicationKspMain() }
         addMainProcTaskGroup { StartupTaskGroupApplicationKspAll() }
         addProcTaskGroup { StartupProcTaskGroupApplicationKsp() }

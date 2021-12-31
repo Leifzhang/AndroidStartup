@@ -1,8 +1,10 @@
 package com.kronos.android.startup.sample.task.ksp
 
 import android.content.Context
+import com.kronos.android.startup.sample.SimpleTask1Provider
 import com.kronos.android.startup.sample.task.info
 import com.kronos.lib.startup.SimpleStartupTask
+import com.kronos.lib.startup.TaskNameProvider
 import com.kronos.startup.annotation.StartupGroup
 
 /**
@@ -13,6 +15,8 @@ import com.kronos.startup.annotation.StartupGroup
  */
 @StartupGroup(group = "ksp")
 class SimpleTask1 : SimpleStartupTask() {
+    override val taskNameProvider: TaskNameProvider
+        get() = SimpleTask1Provider
 
     override fun run(context: Context) {
         info("AsyncTask1")

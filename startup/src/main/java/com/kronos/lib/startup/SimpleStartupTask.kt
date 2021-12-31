@@ -18,9 +18,11 @@ abstract class SimpleStartupTask : StartupTask {
         return false
     }
 
-    override fun tag(): String {
-        return javaClass.canonicalName ?: ""
+    final override fun tag(): String {
+        return taskNameProvider.name()
     }
+
+    abstract val taskNameProvider: TaskNameProvider
 
     override fun onTaskStart() {
 
@@ -30,11 +32,19 @@ abstract class SimpleStartupTask : StartupTask {
 
     }
 
-    override fun dependencies(): MutableList<String> {
+    final override fun dependencies(): MutableList<String> {
         return dependOns.toMutableList()
     }
 
-    fun dependOn(name: String) {
+    private fun dependOn(name: String) {
         dependOns.add(name)
     }
+
+    fun dependOn(provider: TaskNameProvider) {
+        dependOn(provider.name())
+    }
+}
+
+fun TaskNameProvider.name(): String {
+    return javaClass.simpleName
 }

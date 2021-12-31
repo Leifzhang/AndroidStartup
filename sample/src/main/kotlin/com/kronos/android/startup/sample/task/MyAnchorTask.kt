@@ -1,7 +1,10 @@
 package com.kronos.android.startup.sample.task
 
 import android.content.Context
+import com.kronos.android.startup.sample.AsyncTask1Provider
+import com.kronos.android.startup.sample.MyAnchorTaskProvider
 import com.kronos.lib.startup.SimpleStartupTask
+import com.kronos.lib.startup.TaskNameProvider
 
 /**
  *
@@ -10,12 +13,14 @@ import com.kronos.lib.startup.SimpleStartupTask
  *
  */
 class MyAnchorTask : SimpleStartupTask() {
+    override val taskNameProvider: TaskNameProvider
+        get() = MyAnchorTaskProvider
 
     override fun run(context: Context) {
         info("MyAnchorTask")
     }
 
     init {
-        dependOn("taskB")
+        dependOn(AsyncTask1Provider)
     }
 }

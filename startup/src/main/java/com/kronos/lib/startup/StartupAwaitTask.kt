@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch
  *  @Since 2021/11/27
  *
  */
-class StartupAwaitTask(val task: StartupTask) : SimpleStartupTask() {
+class StartupAwaitTask(val task: StartupTask) : StartupTask {
 
     private var dependencies = task.dependencies()
     private lateinit var countDownLatch: CountDownLatch
