@@ -2,6 +2,7 @@ package com.kronos.startup.dag.sql
 
 import com.kronos.lib.startup.data.StartupTaskData
 import com.kronos.lib.startup.utils.ProcessUtils
+import com.kronos.startup.dag.utils.getDayFormat
 
 /**
  *
@@ -13,7 +14,7 @@ import com.kronos.lib.startup.utils.ProcessUtils
 fun MutableList<StartupTaskData>.transform(data: Long): StartupPathInfo {
     val list = getPath()
     return StartupPathInfo(
-        data = data,
+        date = data,
         process = ProcessUtils.myProcName(),
         dagPath = list
     )
@@ -27,3 +28,23 @@ fun MutableList<StartupTaskData>.getPath(): MutableList<StartupPathDataInfo> {
     }
     return list
 }
+
+
+fun MutableList<StartupTaskData>.onTaskAdd() {
+    val dao = StartupDatabaseHelper.databaseInstance.startupDao()
+    forEach {
+        val task = dao.getTaskInfo(
+            requireNotNull(it.taskName),
+            getDayFormat(), ProcessUtils.myProcName() ?: ""
+        )
+        if (task == null) {
+            val sql = it.toSql()
+            dao.insertTaskInfo(sql)
+        } else {
+            task.plus(it.duration)
+            dao.updateTaskInfo(task)
+        }
+    }
+}
+
+

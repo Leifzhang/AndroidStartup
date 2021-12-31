@@ -1,9 +1,11 @@
 package com.kronos.startup.dag.sql
 
+import android.text.TextUtils
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import com.kronos.startup.dag.StartupDagInstallProvider
 
 
 /**
@@ -13,27 +15,41 @@ import androidx.room.TypeConverters
  *
  */
 
-@Entity(tableName = "privacy")
+@Entity(tableName = "startup_path")
 @TypeConverters(PathTypeConvert::class)
 data class StartupPathInfo(
     @PrimaryKey(autoGenerate = true)
     val id: Long? = null,
     @ColumnInfo(name = "date")
-    var data: Long = 0L,
+    var date: Long = 0L,
     @ColumnInfo(name = "process")
     var process: String? = null,
     @ColumnInfo(name = "dagPath")
     var dagPath: MutableList<StartupPathDataInfo>?,
     @ColumnInfo(name = "pathHashCode")
-    var pathHashCode: Int = dagPath.hashCode()
+    var pathHashCode: Int = dagPath.taskNameHash(),
+    @ColumnInfo(name = "appVersion")
+    var appVersion: Long = StartupDagInstallProvider.versionCode
 ) {
     fun updateHashCode() {
-        pathHashCode = dagPath.hashCode()
+        pathHashCode = dagPath.taskNameHash()
     }
 }
 
 
 data class StartupPathDataInfo(
     val name: String?,
-    val threadName: String?
-)
+    val threadName: String?,
+) {
+
+    val mainThread: Boolean = TextUtils.equals(threadName, "main")
+}
+
+
+fun MutableList<StartupPathDataInfo>?.taskNameHash(): Int {
+    val taskName = StringBuilder()
+    this?.forEach {
+        taskName.append("${it.name}_${it.mainThread}")
+    }
+    return taskName.hashCode()
+}

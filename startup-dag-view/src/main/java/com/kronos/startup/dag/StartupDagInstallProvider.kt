@@ -7,8 +7,10 @@ import android.net.Uri
 import com.kronos.lib.startup.StartupConfig
 import com.kronos.startup.dag.sql.StartupDatabaseHelper
 import com.kronos.startup.dag.sql.getPath
+import com.kronos.startup.dag.sql.onTaskAdd
 import com.kronos.startup.dag.sql.transform
 import com.kronos.startup.dag.utils.getDateFormat
+import com.kronos.startup.dag.utils.getVersionCode
 import com.kronos.startup.dag.utils.postUI
 import kotlin.concurrent.thread
 
@@ -20,9 +22,9 @@ import kotlin.concurrent.thread
  */
 class StartupDagInstallProvider : ContentProvider() {
 
-
     override fun onCreate(): Boolean {
         context?.let { StartupDatabaseHelper.init(it) }
+        versionCode = context.getVersionCode()
         StartupConfig.onStartupFinishedListener = {
             thread {
                 val dao = StartupDatabaseHelper.databaseInstance.startupDao()
@@ -37,8 +39,9 @@ class StartupDagInstallProvider : ContentProvider() {
                     dao.updateInfo(data)
                 }
                 postUI {
-                    context?.startDagPathActivity()
+                    context?.startTaskDurationActivity()
                 }
+                this.onTaskAdd()
             }
         }
         return true
@@ -77,5 +80,6 @@ class StartupDagInstallProvider : ContentProvider() {
 
     companion object {
         val formatKey by lazy { getDateFormat() }
+        var versionCode = 0L
     }
 }

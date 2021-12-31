@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
  *  @Since 2021/12/10
  *
  */
-@Database(entities = [StartupPathInfo::class], version = 1)
+@Database(entities = [StartupPathInfo::class, StartTaskInfo::class], version = 1)
 @TypeConverters(PathTypeConvert::class)
 abstract class StartupDatabase : RoomDatabase() {
 
