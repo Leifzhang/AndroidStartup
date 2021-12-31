@@ -16,7 +16,8 @@ fun MutableList<StartupTaskData>.transform(data: Long): StartupPathInfo {
     return StartupPathInfo(
         date = data,
         process = ProcessUtils.myProcName(),
-        dagPath = list
+        dagPath = list,
+        pathHashCode = list.taskNameHash()
     )
 }
 

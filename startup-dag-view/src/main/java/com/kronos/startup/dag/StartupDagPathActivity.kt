@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.kronos.startup.dag.sql.StartupDatabaseHelper
+import com.kronos.startup.dag.sql.StartupPathDataInfo
+import com.kronos.startup.dag.utils.getSimpleName
 import com.kronos.startup.dag.utils.postUI
 import kotlin.concurrent.thread
 
@@ -30,8 +32,8 @@ class StartupDagPathActivity : AppCompatActivity(R.layout.startup_activity_dag_p
             data?.apply {
                 val oldDag = dao.selectNotSame(pathHashCode)
                 postUI {
-                    lastDagView.text = oldDag?.dagPath.toString()
-                    textView.text = this.dagPath.toString()
+                    lastDagView.text = oldDag?.dagPath.text()
+                    textView.text = this.dagPath.text()
                 }
             }
         }
@@ -46,4 +48,13 @@ fun Context.startDagPathActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     startActivity(intent)
+}
+
+fun MutableList<StartupPathDataInfo>?.text(): String {
+    val stringBuilder = StringBuilder()
+    this?.forEach {
+        stringBuilder.append("threadName:${it.name?.getSimpleName()} isMain:${it.mainThread}")
+            .append("\r\n")
+    }
+    return stringBuilder.toString()
 }

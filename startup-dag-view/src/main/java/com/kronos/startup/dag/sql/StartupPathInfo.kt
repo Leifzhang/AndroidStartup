@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.kronos.startup.dag.StartupDagInstallProvider
+import com.kronos.startup.dag.utils.getSimpleName
 
 
 /**
@@ -27,7 +28,7 @@ data class StartupPathInfo(
     @ColumnInfo(name = "dagPath")
     var dagPath: MutableList<StartupPathDataInfo>?,
     @ColumnInfo(name = "pathHashCode")
-    var pathHashCode: Int = dagPath.taskNameHash(),
+    var pathHashCode: Int,
     @ColumnInfo(name = "appVersion")
     var appVersion: Long = StartupDagInstallProvider.versionCode
 ) {
@@ -53,7 +54,7 @@ fun String?.isMainThread(): Boolean {
 fun MutableList<StartupPathDataInfo>?.taskNameHash(): Int {
     val taskName = StringBuilder()
     this?.forEach {
-        taskName.append("${it.name}_${it.mainThread}")
+        taskName.append("${it.name?.getSimpleName()}_${it.mainThread}_")
     }
-    return taskName.hashCode()
+    return taskName.toString().hashCode()
 }
