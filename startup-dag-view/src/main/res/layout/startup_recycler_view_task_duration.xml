@@ -34,7 +34,7 @@
         android:padding="5dp"
         tools:text="12345" />
 
-    <LinearLayout
+    <!--<LinearLayout
         android:id="@+id/dependenciesLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,22 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="12345" />
-    </LinearLayout>
-
-
-    <TextView
-        android:id="@+id/startTaskTv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textColor="#1482f0" />
-
-    <TextView
-        android:id="@+id/endTaskTv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textColor="#1482f0" />
+    </LinearLayout>-->
 
     <TextView
         android:id="@+id/durationTv"
@@ -76,9 +61,4 @@
         android:padding="5dp"
         tools:text="12345" />
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/taskGridLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </LinearLayout>

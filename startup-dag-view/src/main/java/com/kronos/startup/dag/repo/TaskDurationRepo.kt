@@ -16,35 +16,34 @@ class TaskDurationRepo {
 
     private val dao = StartupDatabaseHelper.databaseInstance.startupDao()
 
-    fun getTodayList(invoke: (MutableList<StartTaskInfo>) -> Unit) {
+    fun getTaskDurationList(invoke: (MutableList<StartTaskInfo>) -> Unit) {
         thread {
             val list = dao.getDayTask()
-            postUI {
-                invoke.invoke(list)
-            }
-        }
-    }
-
-
-    fun getHistoryList(invoke: (MutableList<StartTaskInfo>) -> Unit) {
-        thread {
-            val list = dao.getHistoryTask()
-            val hashMap = linkedMapOf<String, StartTaskInfo>()
-            list.forEach {
-                val task = hashMap.getValueByDefault(it.taskName ?: "") {
+            val oldList = dao.getHistoryTask()
+            val hashMap = linkedMapOf<String?, StartTaskInfo>()
+            oldList.forEach {
+                val task = hashMap.getValueByDefault(it.taskName) {
                     it
                 }
                 if (task != it) {
                     task.mix(it)
                 }
             }
-            val historyList = mutableListOf<StartTaskInfo>()
+            val taskList = mutableListOf<StartTaskInfo>()
+            list.forEach {
+                taskList.add(it)
+                hashMap[it.taskName]?.let { it1 ->
+                    taskList.add(it1)
+                    hashMap.remove(it.taskName)
+                }
+            }
             hashMap.forEach {
-                historyList.add(it.value)
+                taskList.add(it.value)
             }
             postUI {
-                invoke.invoke(historyList)
+                invoke.invoke(taskList)
             }
         }
     }
+
 }

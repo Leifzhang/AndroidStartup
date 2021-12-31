@@ -42,9 +42,13 @@ data class StartupPathDataInfo(
     val threadName: String?,
 ) {
 
-    val mainThread: Boolean = TextUtils.equals(threadName, "main")
+    val mainThread: Boolean = threadName.isMainThread()
 }
 
+
+fun String?.isMainThread(): Boolean {
+    return TextUtils.equals(this, "main")
+}
 
 fun MutableList<StartupPathDataInfo>?.taskNameHash(): Int {
     val taskName = StringBuilder()

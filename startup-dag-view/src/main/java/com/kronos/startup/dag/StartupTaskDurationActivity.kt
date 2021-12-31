@@ -3,11 +3,14 @@ package com.kronos.startup.dag
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.kronos.startup.dag.adapter.TaskViewAdapter
 import com.kronos.startup.dag.repo.TaskDurationRepo
+import com.kronos.startup.dag.utils.dpToPx
 
 /**
  *
@@ -22,13 +25,20 @@ class StartupTaskDurationActivity : AppCompatActivity(R.layout.startup_activity_
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val textView = findViewById<TextView>(R.id.today)
-        repo.getTodayList {
-            textView.text = it.toString()
+        val taskRecyclerView = findViewById<RecyclerView>(R.id.taskRecyclerView)
+        taskRecyclerView.layoutManager = LinearLayoutManager(this)
+        taskRecyclerView.addItemDecoration(DividerItemDecoration().apply {
+            setColorDrawable(Color.parseColor("#1482f0"), 1.dpToPx())
+        })
+        repo.getTaskDurationList {
+            taskRecyclerView.adapter = TaskViewAdapter(it)
         }
-        repo.getHistoryList {
-            Log.i(TAG, it.toString())
-        }
+        /* repo.getTodayList {
+             textView.text = it.toString()
+         }
+         repo.getHistoryList {
+             Log.i(TAG, it.toString())
+         }*/
     }
 
     companion object {
