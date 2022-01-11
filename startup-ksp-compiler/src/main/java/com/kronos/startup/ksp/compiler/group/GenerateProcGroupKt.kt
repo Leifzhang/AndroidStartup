@@ -1,4 +1,4 @@
-package com.kronos.startup.ksp.compiler
+package com.kronos.startup.ksp.compiler.group
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies

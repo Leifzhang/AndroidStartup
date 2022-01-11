@@ -5,37 +5,68 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Origin
+import com.kronos.startup.annotation.Startup
 import com.kronos.startup.annotation.StartupGroup
+import com.kronos.startup.ksp.compiler.group.GenerateGroupKt
+import com.kronos.startup.ksp.compiler.group.GenerateProcGroupKt
+import com.kronos.startup.ksp.compiler.task.GenerateTaskKt
+import com.kronos.startup.ksp.compiler.task.StartupTaskBuilder
 import com.squareup.kotlinpoet.ClassName
 
 class StartupProcessor(
-    val codeGenerator: CodeGenerator,
+    private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
-    val moduleName: String
+    private val moduleName: String
 ) : SymbolProcessor {
+    private lateinit var startupGroupType: KSType
     private lateinit var startupType: KSType
-    private var isload = false
     private val taskGroupMap = hashMapOf<String, MutableList<ClassName>>()
     private val procTaskGroupMap =
         hashMapOf<String, MutableList<Pair<ClassName, ArrayList<String>>>>()
 
+    private val taskMap = mutableListOf<StartupTaskBuilder>()
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("StartupProcessor start")
-
-        val symbols = resolver.getSymbolsWithAnnotation(StartupGroup::class.java.name)
+        val startupSymbols = resolver.getSymbolsWithAnnotation(Startup::class.java.name)
         startupType = resolver.getClassDeclarationByName(
-            resolver.getKSNameFromString(StartupGroup::class.java.name)
+            resolver.getKSNameFromString(Startup::class.java.name)
         )?.asType() ?: kotlin.run {
-            logger.error("JsonClass type not found on the classpath.")
+            logger.error("Startup type not found on the classpath.")
             return emptyList()
         }
-        symbols.asSequence().forEach {
-            add(it)
+        startupSymbols.asSequence().forEach {
+            addStartUp(it)
         }
+        val symbols = resolver.getSymbolsWithAnnotation(StartupGroup::class.java.name)
+        startupGroupType = resolver.getClassDeclarationByName(
+            resolver.getKSNameFromString(StartupGroup::class.java.name)
+        )?.asType() ?: kotlin.run {
+            logger.error("StartupGroup type not found on the classpath.")
+            return emptyList()
+        }
+
+        symbols.asSequence().forEach {
+            addGroup(it)
+        }
+
         return emptyList()
     }
 
-    private fun add(type: KSAnnotated) {
+
+    private fun addStartUp(type: KSAnnotated) {
+        logger.check(type is KSClassDeclaration && type.origin == Origin.KOTLIN, type) {
+            "@JsonClass can't be applied to $type: must be a Kotlin class"
+        }
+
+        if (type !is KSClassDeclaration) return
+
+        val startupAnnotation = type.findAnnotationWithType(startupType) ?: return
+        taskMap.add(StartupTaskBuilder(type))
+
+    }
+
+    private fun addGroup(type: KSAnnotated) {
         logger.check(type is KSClassDeclaration && type.origin == Origin.KOTLIN, type) {
             "@JsonClass can't be applied to $type: must be a Kotlin class"
         }
@@ -44,9 +75,9 @@ class StartupProcessor(
 
         //class type
 
-        val routerAnnotation = type.findAnnotationWithType(startupType) ?: return
-        val groupName = routerAnnotation.getMember<String>("group")
-        val strategy = routerAnnotation.arguments.firstOrNull {
+        val startGroupAnnotation = type.findAnnotationWithType(startupGroupType) ?: return
+        val groupName = startGroupAnnotation.getMember<String>("group")
+        val strategy = startGroupAnnotation.arguments.firstOrNull {
             it.name?.asString() == "strategy"
         }?.value.toString().toValue() ?: return
         if (strategy.equals("other", true)) {
@@ -55,7 +86,7 @@ class StartupProcessor(
                 procTaskGroupMap[key] = mutableListOf()
             }
             val list = procTaskGroupMap[key] ?: return
-            list.add(type.toClassName() to (routerAnnotation.getMember("processName")))
+            list.add(type.toClassName() to (startGroupAnnotation.getMember("processName")))
         } else {
             val key = "${groupName}${strategy}"
             if (taskGroupMap[key] == null) {
@@ -78,6 +109,7 @@ class StartupProcessor(
         super.finish()
         // logger.error("className:${moduleName}")
         try {
+            val taskGenerate = GenerateTaskKt(taskMap, codeGenerator)
             taskGroupMap.forEach { it ->
                 val generateKt = GenerateGroupKt(
                     "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
