@@ -3,9 +3,9 @@ package com.kronos.android.startup.sample.task
 import android.app.Application
 import android.util.Log
 import com.kronos.lib.startup.*
-import com.kronos.lib.startup.group.StartupProcTaskGroupApplicationKsp
-import com.kronos.lib.startup.group.StartupTaskGroupApplicationKspAll
-import com.kronos.lib.startup.group.StartupTaskGroupApplicationKspMain
+import com.kronos.lib.startup.group.StartupProcTaskGroupApplicationProc
+import com.kronos.lib.startup.group.StartupTaskGroupApplicationAll
+import com.kronos.lib.startup.group.StartupTaskGroupApplicationMain
 import java.lang.Thread.sleep
 
 /**
@@ -77,10 +77,10 @@ fun Application.createStartup(): Startup.Builder = run {
                 sleep(10000)
             }
         }
-        //  addTaskGroup { taskGroup() }
-        addTaskGroup { StartupTaskGroupApplicationKspMain() }
-        addMainProcTaskGroup { StartupTaskGroupApplicationKspAll() }
-        addProcTaskGroup { StartupProcTaskGroupApplicationKsp() }
+        addTaskGroup { taskGroup() }
+        addTaskGroup { StartupTaskGroupApplicationMain() }
+        addMainProcTaskGroup { StartupTaskGroupApplicationAll() }
+        addProcTaskGroup { StartupProcTaskGroupApplicationProc() }
     }
 }
 

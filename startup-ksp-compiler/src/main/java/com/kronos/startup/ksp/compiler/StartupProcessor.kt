@@ -6,36 +6,72 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Origin
 import com.kronos.startup.annotation.StartupGroup
+import com.kronos.startup.annotation.startup.Startup
+import com.kronos.startup.ksp.compiler.group.GenerateGroupKt
+import com.kronos.startup.ksp.compiler.group.GenerateProcGroupKt
+import com.kronos.startup.ksp.compiler.task.GenerateTaskKt
+import com.kronos.startup.ksp.compiler.task.StartupTaskBuilder
+import com.kronos.startup.ksp.compiler.utils.getValueByDefault
 import com.squareup.kotlinpoet.ClassName
 
 class StartupProcessor(
-    val codeGenerator: CodeGenerator,
+    private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
-    val moduleName: String
+    private val moduleName: String
 ) : SymbolProcessor {
+    private lateinit var startupGroupType: KSType
     private lateinit var startupType: KSType
-    private var isload = false
     private val taskGroupMap = hashMapOf<String, MutableList<ClassName>>()
     private val procTaskGroupMap =
         hashMapOf<String, MutableList<Pair<ClassName, ArrayList<String>>>>()
 
+    private val taskMap = mutableListOf<StartupTaskBuilder>()
+
+    init {
+        mLogger = logger
+    }
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("StartupProcessor start")
-
-        val symbols = resolver.getSymbolsWithAnnotation(StartupGroup::class.java.name)
+        val startupSymbols = resolver.getSymbolsWithAnnotation(Startup::class.java.name)
         startupType = resolver.getClassDeclarationByName(
-            resolver.getKSNameFromString(StartupGroup::class.java.name)
+            resolver.getKSNameFromString(Startup::class.java.name)
         )?.asType() ?: kotlin.run {
-            logger.error("JsonClass type not found on the classpath.")
+            logger.error("Startup type not found on the classpath.")
             return emptyList()
         }
-        symbols.asSequence().forEach {
-            add(it)
+        startupSymbols.asSequence().forEach {
+            addStartUp(it)
         }
+        val symbols = resolver.getSymbolsWithAnnotation(StartupGroup::class.java.name)
+        startupGroupType = resolver.getClassDeclarationByName(
+            resolver.getKSNameFromString(StartupGroup::class.java.name)
+        )?.asType() ?: kotlin.run {
+            logger.error("StartupGroup type not found on the classpath.")
+            return emptyList()
+        }
+
+        symbols.asSequence().forEach {
+            addGroup(it)
+        }
+
         return emptyList()
     }
 
-    private fun add(type: KSAnnotated) {
+
+    private fun addStartUp(type: KSAnnotated) {
+        logger.check(type is KSClassDeclaration && type.origin == Origin.KOTLIN, type) {
+            "@JsonClass can't be applied to $type: must be a Kotlin class"
+        }
+
+        if (type !is KSClassDeclaration) return
+
+        val startupAnnotation = type.findAnnotationWithType(startupType) ?: return
+        taskMap.add(StartupTaskBuilder(type, startupAnnotation))
+
+    }
+
+    private fun addGroup(type: KSAnnotated) {
         logger.check(type is KSClassDeclaration && type.origin == Origin.KOTLIN, type) {
             "@JsonClass can't be applied to $type: must be a Kotlin class"
         }
@@ -44,20 +80,19 @@ class StartupProcessor(
 
         //class type
 
-        val routerAnnotation = type.findAnnotationWithType(startupType) ?: return
-        val groupName = routerAnnotation.getMember<String>("group")
-        val strategy = routerAnnotation.arguments.firstOrNull {
+        val startGroupAnnotation = type.findAnnotationWithType(startupGroupType) ?: return
+        val strategy = startGroupAnnotation.arguments.firstOrNull {
             it.name?.asString() == "strategy"
-        }?.value.toString().toValue() ?: return
+        }?.value.toString().toValue()
         if (strategy.equals("other", true)) {
-            val key = groupName
+            val key = PROC_MODULE_KEY
             if (procTaskGroupMap[key] == null) {
                 procTaskGroupMap[key] = mutableListOf()
             }
             val list = procTaskGroupMap[key] ?: return
-            list.add(type.toClassName() to (routerAnnotation.getMember("processName")))
+            list.add(type.toClassName() to (startGroupAnnotation.getMember("processName")))
         } else {
-            val key = "${groupName}${strategy}"
+            val key = strategy
             if (taskGroupMap[key] == null) {
                 taskGroupMap[key] = mutableListOf()
             }
@@ -66,18 +101,24 @@ class StartupProcessor(
         }
     }
 
-    private fun String.toValue(): String {
-        var lastIndex = lastIndexOf(".") + 1
-        if (lastIndex <= 0) {
-            lastIndex = 0
-        }
-        return subSequence(lastIndex, length).toString().lowercase().upCaseKeyFirstChar()
-    }
 
     override fun finish() {
         super.finish()
         // logger.error("className:${moduleName}")
         try {
+            val taskGenerate = GenerateTaskKt(taskMap, codeGenerator)
+            taskGenerate.taskGroupMap.forEach {
+                val list = taskGroupMap.getValueByDefault(it.key) {
+                    mutableListOf()
+                }
+                list.addAll(it.value)
+            }
+            taskGenerate.procTaskGroupMap.forEach {
+                val list = procTaskGroupMap.getValueByDefault(it.key) {
+                    mutableListOf()
+                }
+                list.addAll(it.value)
+            }
             taskGroupMap.forEach { it ->
                 val generateKt = GenerateGroupKt(
                     "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
@@ -104,6 +145,11 @@ class StartupProcessor(
             )
         }
     }
+
+    companion object {
+        var mLogger: KSPLogger? = null
+    }
+
 }
 
 
@@ -119,8 +165,16 @@ class StartupProcessorProvider : SymbolProcessorProvider {
     }
 }
 
+fun String.toValue(): String {
+    var lastIndex = lastIndexOf(".") + 1
+    if (lastIndex <= 0) {
+        lastIndex = 0
+    }
+    return subSequence(lastIndex, length).toString().lowercase().upCaseKeyFirstChar()
+}
+
 fun String.upCaseKeyFirstChar(): String {
-    return if (Character.isUpperCase(this[0])) {
+    return if (this.isEmpty() || Character.isUpperCase(this[0])) {
         this
     } else {
         StringBuilder().append(Character.toUpperCase(this[0])).append(this.substring(1)).toString()
@@ -128,3 +182,4 @@ fun String.upCaseKeyFirstChar(): String {
 }
 
 const val KEY_MODULE_NAME = "MODULE_NAME"
+const val PROC_MODULE_KEY = "Proc"
