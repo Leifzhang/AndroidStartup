@@ -13,8 +13,8 @@ import com.kronos.startup.annotation.StartupGroup
  *  @Since 2021/11/26
  *
  */
-@StartupGroup(group = "ksp")
-class AsyncTask1  : SimpleStartupTask() {
+@StartupGroup()
+class AsyncTask1 : SimpleStartupTask() {
 
     override fun mainThread(): Boolean {
         return false

@@ -14,7 +14,7 @@ import com.kronos.startup.annotation.StartupGroup
  *  @Since 2021/12/9
  *
  */
-@StartupGroup(group = "ksp", strategy = Process.MAIN)
+@StartupGroup(strategy = Process.MAIN)
 class SimpleTask2 : SimpleStartupTask() {
 
     override val taskNameProvider: TaskNameProvider

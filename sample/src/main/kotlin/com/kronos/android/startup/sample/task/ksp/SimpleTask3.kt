@@ -14,7 +14,7 @@ import com.kronos.startup.annotation.StartupGroup
  *  @Since 2021/12/9
  *
  */
-@StartupGroup(group = "ksp", strategy = Process.OTHER, processName = ["web"])
+@StartupGroup(strategy = Process.OTHER, processName = ["web"])
 class SimpleTask3 : SimpleStartupTask() {
     override val taskNameProvider: TaskNameProvider
         get() = SimpleTask3Provider

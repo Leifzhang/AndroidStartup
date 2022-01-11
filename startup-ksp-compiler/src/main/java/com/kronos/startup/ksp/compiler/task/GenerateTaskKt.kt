@@ -2,6 +2,7 @@ package com.kronos.startup.ksp.compiler.task
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.kronos.startup.ksp.compiler.PROC_MODULE_KEY
 import com.squareup.kotlinpoet.*
 
 /**
@@ -12,15 +13,40 @@ class GenerateTaskKt(
     builders: MutableList<StartupTaskBuilder>,
     private val codeGenerator: CodeGenerator
 ) {
+    val procTaskGroupMap = hashMapOf<String, MutableList<Pair<ClassName, ArrayList<String>>>>()
+
+    val taskGroupMap = hashMapOf<String, MutableList<ClassName>>()
 
     init {
         builders.forEach {
+            addToMap(it)
             generateSealedClass(it.className)
-            generateTaskClass(it.className)
+            generateTaskClass(it)
         }
     }
 
-    fun generateTaskClass(name: ClassName) {
+    private fun addToMap(taskBuilder: StartupTaskBuilder) {
+        val name = taskBuilder.className
+        val className = ClassName(name.packageName, name.simpleName + "Task")
+        if (taskBuilder.isProcOther()) {
+            val key = PROC_MODULE_KEY
+            if (procTaskGroupMap[key] == null) {
+                procTaskGroupMap[key] = mutableListOf()
+            }
+            val list = procTaskGroupMap[key] ?: return
+            list.add(className to (taskBuilder.processList))
+        } else {
+            val key = taskBuilder.strategy
+            if (taskGroupMap[key] == null) {
+                taskGroupMap[key] = mutableListOf()
+            }
+            val list = taskGroupMap[key] ?: return
+            list.add(className)
+        }
+    }
+
+    private fun generateTaskClass(taskBuilder: StartupTaskBuilder) {
+        val name = taskBuilder.className
         val className = name.simpleName + "Task"
         val specBuilder = FileSpec.builder(
             name.packageName,
@@ -45,6 +71,12 @@ class GenerateTaskKt(
             addParameter("context", ClassName("android.content", "Context"))
             addStatement("val task = %T()", name)
             addStatement("task.run(context)")
+        }
+        taskBuilder.getAsyncFun()?.apply {
+            typeSpec.addFunction(this)
+        }
+        taskBuilder.getAwaitFun()?.apply {
+            typeSpec.addFunction(this)
         }
         typeSpec.addProperty(property.build())
         typeSpec.addFunction(runFun.build())

@@ -3,7 +3,9 @@ package com.kronos.android.startup.sample.task.generate
 import android.content.Context
 import com.kronos.android.startup.sample.task.info
 import com.kronos.lib.startup.TaskRunner
-import com.kronos.startup.annotation.Startup
+import com.kronos.startup.annotation.startup.Async
+import com.kronos.startup.annotation.startup.Await
+import com.kronos.startup.annotation.startup.Startup
 
 /**
  *
@@ -11,7 +13,9 @@ import com.kronos.startup.annotation.Startup
  *  @Since 2021/12/31
  *
  */
-@Startup
+@Async
+@Await
+@Startup()
 class SampleGenerate1Task : TaskRunner {
 
     override fun run(context: Context) {
