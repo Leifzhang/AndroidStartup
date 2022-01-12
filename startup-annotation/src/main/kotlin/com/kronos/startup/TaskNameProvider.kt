@@ -1,4 +1,4 @@
-package com.kronos.lib.startup
+package com.kronos.startup
 
 /**
  *

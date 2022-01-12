@@ -1,6 +1,6 @@
 package com.kronos.android.startup.sample
 
-import com.kronos.lib.startup.TaskNameProvider
+import com.kronos.startup.TaskNameProvider
 
 /**
  *

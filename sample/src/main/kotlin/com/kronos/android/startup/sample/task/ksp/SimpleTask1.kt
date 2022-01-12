@@ -4,7 +4,7 @@ import android.content.Context
 import com.kronos.android.startup.sample.SimpleTask1Provider
 import com.kronos.android.startup.sample.task.info
 import com.kronos.lib.startup.SimpleStartupTask
-import com.kronos.lib.startup.TaskNameProvider
+import com.kronos.startup.TaskNameProvider
 import com.kronos.startup.annotation.StartupGroup
 
 /**
@@ -21,4 +21,5 @@ class SimpleTask1 : SimpleStartupTask() {
     override fun run(context: Context) {
         info("AsyncTask1")
     }
+
 }
