@@ -4,7 +4,7 @@ import android.content.Context
 import com.kronos.android.startup.sample.SimpleTask2Provider
 import com.kronos.android.startup.sample.task.info
 import com.kronos.lib.startup.SimpleStartupTask
-import com.kronos.lib.startup.TaskNameProvider
+import com.kronos.startup.TaskNameProvider
 import com.kronos.startup.annotation.Process
 import com.kronos.startup.annotation.StartupGroup
 

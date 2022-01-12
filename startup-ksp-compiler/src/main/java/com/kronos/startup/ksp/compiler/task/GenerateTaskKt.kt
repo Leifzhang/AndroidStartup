@@ -63,7 +63,7 @@ class GenerateTaskKt(
         val providerName = ClassName(STARTUP_PACKAGE, name.simpleName + "Provider")
         val property = PropertySpec.builder(
             "taskNameProvider",
-            ClassName(STARTUP_PACKAGE, "TaskNameProvider")
+            ClassName(STARTUP_ANNOTATION, "TaskNameProvider")
         ).addModifiers(KModifier.OVERRIDE)
             .getter(FunSpec.getterBuilder().addStatement("return %T", providerName).build())
         val runFun: FunSpec.Builder = FunSpec.builder("run").apply {
@@ -76,6 +76,9 @@ class GenerateTaskKt(
             typeSpec.addFunction(this)
         }
         taskBuilder.getAwaitFun()?.apply {
+            typeSpec.addFunction(this)
+        }
+        taskBuilder.getDependenciesFun()?.apply {
             typeSpec.addFunction(this)
         }
         typeSpec.addProperty(property.build())
@@ -99,7 +102,7 @@ class GenerateTaskKt(
         val helloWorld = TypeSpec.objectBuilder(className)
             .addSuperinterface(
                 ClassName(
-                    STARTUP_PACKAGE,
+                    STARTUP_ANNOTATION,
                     "TaskNameProvider"
                 )
             )
@@ -115,6 +118,7 @@ class GenerateTaskKt(
 
     companion object {
         private const val STARTUP_PACKAGE = "com.kronos.lib.startup"
+        private const val STARTUP_ANNOTATION = "com.kronos.startup"
     }
 
 

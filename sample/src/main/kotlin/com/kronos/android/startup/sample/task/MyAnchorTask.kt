@@ -4,7 +4,7 @@ import android.content.Context
 import com.kronos.android.startup.sample.AsyncTask1Provider
 import com.kronos.android.startup.sample.MyAnchorTaskProvider
 import com.kronos.lib.startup.SimpleStartupTask
-import com.kronos.lib.startup.TaskNameProvider
+import com.kronos.startup.TaskNameProvider
 
 /**
  *

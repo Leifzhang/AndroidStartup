@@ -6,6 +6,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.kronos.startup.ksp.compiler.getMember
 import com.kronos.startup.ksp.compiler.toClassName
 import com.kronos.startup.ksp.compiler.toValue
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 
@@ -22,6 +23,8 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
     var isAwait = false
     var strategy: String
     var processList = arrayListOf<String>()
+    val dependOnClassList = mutableListOf<ClassName>()
+    val dependOnStringList = mutableListOf<String>()
 
     init {
         type.annotations.forEach {
@@ -31,6 +34,12 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
             }
             if (annotation.canonicalName == "com.kronos.startup.annotation.startup.Await") {
                 isAwait = true
+            }
+            if (annotation.canonicalName == "com.kronos.startup.annotation.startup.DependOn") {
+                val value = it.getMember<ArrayList<ClassName>>("dependOn")
+                dependOnClassList.addAll(value)
+                val dependOnTag = it.getMember<ArrayList<String>>("dependOnTag")
+                dependOnStringList.addAll(dependOnTag)
             }
         }
 
@@ -61,6 +70,20 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
         return FunSpec.builder("await").addModifiers(KModifier.OVERRIDE)
             .returns(Boolean::class)
             .addStatement("return true").build()
+    }
+
+    fun getDependenciesFun(): FunSpec? {
+        if (dependOnClassList.isEmpty() && dependOnStringList.isEmpty()) {
+            return null
+        }
+        val funSpec = FunSpec.builder("addDependencies").addModifiers(KModifier.OVERRIDE)
+        dependOnClassList.forEach {
+            funSpec.addStatement("dependOn(%T)", it)
+        }
+        dependOnStringList.forEach {
+            funSpec.addStatement("dependOnName(%S)", it)
+        }
+        return funSpec.build()
     }
 
 

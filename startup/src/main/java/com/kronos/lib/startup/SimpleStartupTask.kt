@@ -1,5 +1,7 @@
 package com.kronos.lib.startup
 
+import com.kronos.startup.TaskNameProvider
+
 /**
  *
  *  @Author LiABao
@@ -8,7 +10,7 @@ package com.kronos.lib.startup
  */
 abstract class SimpleStartupTask : StartupTask {
 
-    private val dependOns = hashSetOf<String>()
+    internal val dependOns = hashSetOf<String>()
 
     override fun mainThread(): Boolean {
         return true
