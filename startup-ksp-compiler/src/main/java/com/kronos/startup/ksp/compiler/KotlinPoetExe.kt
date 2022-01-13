@@ -59,7 +59,9 @@ internal fun KSClassDeclaration.toClassName(): ClassName {
 
     val simpleNames = typesString
         .split(".")
-    return ClassName(pkgName, simpleNames)
+    return ClassName(pkgName, simpleNames).apply {
+
+    }
 }
 
 internal fun KSTypeArgument.toTypeName(typeParamResolver: TypeParameterResolver): TypeName {

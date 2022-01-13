@@ -48,7 +48,7 @@ class Startup private constructor(private val builder: Builder) {
         }
 
         fun addTaskGroup(group: StartupTaskGroup): Builder {
-            val taskList = group.group().takeIf { it.isNotEmpty() } ?: return this
+            val taskList = group.group(this).takeIf { it.isNotEmpty() } ?: return this
             taskList.forEach {
                 addStartTask(it)
             }
@@ -57,7 +57,7 @@ class Startup private constructor(private val builder: Builder) {
 
         fun addMainProcTaskGroup(group: StartupTaskGroup): Builder {
             if (app.isMainProc(processName)) {
-                val taskList = group.group().takeIf { it.isNotEmpty() } ?: return this
+                val taskList = group.group(this).takeIf { it.isNotEmpty() } ?: return this
                 taskList.forEach {
                     addStartTask(it)
                 }
@@ -67,7 +67,8 @@ class Startup private constructor(private val builder: Builder) {
 
 
         fun addProcTaskGroup(group: StartupTaskProcessGroup): Builder {
-            val taskList = group.group(processName ?: "").takeIf { it.isNotEmpty() } ?: return this
+            val taskList =
+                group.group(this, processName ?: "").takeIf { it.isNotEmpty() } ?: return this
             taskList.forEach {
                 addStartTask(it)
             }

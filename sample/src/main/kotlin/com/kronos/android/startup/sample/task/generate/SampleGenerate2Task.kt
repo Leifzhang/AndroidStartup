@@ -6,6 +6,7 @@ import com.kronos.lib.startup.SampleGenerate1TaskProvider
 import com.kronos.lib.startup.TaskRunner
 import com.kronos.startup.annotation.Process
 import com.kronos.startup.annotation.startup.DependOn
+import com.kronos.startup.annotation.startup.MustAfter
 import com.kronos.startup.annotation.startup.Startup
 
 /**
@@ -18,6 +19,7 @@ import com.kronos.startup.annotation.startup.Startup
     dependOn = [SampleGenerate1TaskProvider::class]
 )
 @Startup(strategy = Process.OTHER, processName = ["web"])
+@MustAfter
 class SampleGenerate2Task : TaskRunner {
 
     override fun run(context: Context) {

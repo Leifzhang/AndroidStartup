@@ -4,8 +4,6 @@ import android.app.Application
 import android.util.Log
 import com.kronos.lib.startup.*
 import com.kronos.lib.startup.group.StartupProcTaskGroupApplicationProc
-import com.kronos.lib.startup.group.StartupTaskGroupApplicationAll
-import com.kronos.lib.startup.group.StartupTaskGroupApplicationMain
 import java.lang.Thread.sleep
 
 /**
@@ -78,8 +76,6 @@ fun Application.createStartup(): Startup.Builder = run {
             }
         }
         addTaskGroup { taskGroup() }
-        addTaskGroup { StartupTaskGroupApplicationMain() }
-        addMainProcTaskGroup { StartupTaskGroupApplicationAll() }
         addProcTaskGroup { StartupProcTaskGroupApplicationProc() }
     }
 }

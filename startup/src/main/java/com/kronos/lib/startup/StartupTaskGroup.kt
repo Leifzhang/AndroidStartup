@@ -8,16 +8,16 @@ package com.kronos.lib.startup
  */
 
 interface StartupTaskGroup {
-    fun group(): MutableList<StartupTask>
+    fun group(builder: Startup.Builder): MutableList<StartupTask>
 }
 
 interface StartupTaskProcessGroup {
-    fun group(process: String): MutableList<StartupTask>
+    fun group(builder: Startup.Builder, process: String): MutableList<StartupTask>
 }
 
 fun startupTaskGroup(lambda: MutableList<StartupTask>.() -> Unit): StartupTaskGroup {
     val startupTaskGroup = object : StartupTaskGroup {
-        override fun group(): MutableList<StartupTask> {
+        override fun group(builder: Startup.Builder): MutableList<StartupTask> {
             val list = mutableListOf<StartupTask>()
             lambda.invoke(list)
             return list
