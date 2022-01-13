@@ -50,8 +50,32 @@ dependencies {
 
 2. 创建一个任务并添加注解
 
+新增新的启动注解，通过注解的排列组合来生成新的启动任务。
+
+```kotlin
+@Async
+@Await
+@DependOn(
+    dependOn = [AsyncTask1Provider::class, SimpleTask2Provider::class],
+    dependOnTag = ["taskB"]
+)
+@Startup(strategy = Process.MAIN)
+@MustAfter
+class SampleGenerate1Task : TaskRunner {
+
+    override fun run(context: Context) {
+        info("MyAnchorTask")
+    }
+
+}
+```
+
+老的启动任务声明
+
 ```kotlin
 @StartupGroup(group = "ksp")
+// 可选锚点
+@MustAfter
 class AsyncTask1 : SimpleStartupTask() {
 
     override fun mainThread(): Boolean {
@@ -69,6 +93,8 @@ class AsyncTask1 : SimpleStartupTask() {
 ```
 
 考虑到多进程，每个进程启动的任务不同的情况下需要对任务进行额外分组，下面demo为指定web进程的任务。获取注解方式大部分基于反射实现，属于合规的放心使用。
+
+
 
 ```kotlin
 @StartupGroup(group = "ksp", strategy = Process.OTHER, processName = ["web"])
@@ -97,46 +123,34 @@ class SimpleTask2 : SimpleStartupTask() {
 
 3. 添加组，该产物会存在在`build/generated/ksp`文件路径下，并根据group和moduleName等作为唯一类名。
 
+优化项，把所有taskGroup放到了一起，单一module可能只有唯一。
+
 ```kotlin
-public class StartupTaskGroupApplicationKspAll : StartupTaskGroup {
-    public override fun group(): MutableList<StartupTask> {
+public class StartupProcTaskGroupApplicationProc : StartupTaskProcessGroup {
+    public override fun group(builder: Builder, process: String): MutableList<StartupTask> {
         val list = mutableListOf<StartupTask>()
         list.add(AsyncTask1())
         list.add(SimpleTask1())
-        return list
-    }
-}
-
-addTaskGroup(StartupTaskGroupApplicationKspAll())
-```
-
-主进程任务组
-
-```kotlin
-public class StartupTaskGroupApplicationKspMain : StartupTaskGroup {
-    public override fun group(): MutableList<StartupTask> {
-        val list = mutableListOf<StartupTask>()
-        list.add(SimpleTask2())
-        return list
-    }
-}
-
-```
-
-子进程taskGroup
-
-```kotlin
-public class StartupProcTaskGroupApplicationKsp : StartupTaskProcessGroup {
-    public override fun group(process: String): MutableList<StartupTask> {
-        val list = mutableListOf<StartupTask>()
-        if (process.contains("web")) {
+        if(process.isMainProc()) {
+            builder.mustAfterAnchorTask(SimpleTask2())
+        }
+        if(process.isMainProc()) {
+            list.add(SampleGenerate1TaskTask())
+        }
+        if(process.contains("web")) {
             list.add(SimpleTask3())
+        }
+        if(process.contains("web")) {
+            builder.mustAfterAnchorTask(SampleGenerate2TaskTask())
         }
         return list
     }
 }
 
+
+addProcTaskGroup { StartupProcTaskGroupApplicationProc() }
 ```
+
 
 # dsl
 
@@ -267,9 +281,35 @@ dependencies {
 
 通过ksp 生成一部分动态的组，这部分暂时只能手动添加，后续考虑优先梳理依赖，但是并没有完全完成解耦。
 
-# TODO
+# 调试组件
 
-任务防止劣化的调试工具没有完成。
+任务防止劣化的调试工具完成。 
+
+![device-2022-01-02-120141.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3e5d3b85c7334c8d80eee44b4c219cdf~tplv-k3u1fbpfcp-watermark.image?)
+
+## 启动时间轴
+
+江湖上一直流传着我的外号-ui大湿，在下也不是浪得虚名，ui大湿画出来的图形那叫一个美如画啊。
+
+![device-2022-01-02-120203.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/746b475967c947ea83421b954456db94~tplv-k3u1fbpfcp-watermark.image?)
+
+
+这部分原理比较简单，我们把当前启动任务的数据进行了收集，然后根据线程名进行分发，记录任务开始和结束的节点，然后通过图形化进行展示。
+
+如果你第一时间看不懂，可以参考下自选股列表，每一列都是代表一个线程执行的时间轴。
+
+## 启动顺序是否变更
+
+我们会在每次启动的时候将当前启动的顺序进行数据库记录，然后通过数据库找出和当前hashcode不一样的任务，然后比对下用textview的形式展示出来，方便测试同学反馈问题。
+
+这个地方的原理的，我是将整个启动任务通过字符串拼接，然后生成一个字符串，之后通过字符串的hashcode作为唯一标识符，不同字符串生成的hashcode也是不同的。
+
+这里有个傻事就是我一开始对比的是`stringbuilder`的hashcode，然后发现一样的任务竟然值变更了，我真傻真的。
+
+![device-2022-01-02-120221.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ba1f718ec1794140bd53306f351ae782~tplv-k3u1fbpfcp-watermark.image?)
+
+别问，问就是ui大湿，textview不香？
+
 
 # 玩具属性
 
