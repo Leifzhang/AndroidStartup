@@ -161,5 +161,5 @@ fun Context.isMainProc(proc: String?): Boolean {
 }
 
 fun String?.isMainProc(): Boolean {
-    return this?.contains(":") ?: false
+    return this?.contains(":") == false ?: false
 }
