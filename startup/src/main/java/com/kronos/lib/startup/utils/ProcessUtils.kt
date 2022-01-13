@@ -159,3 +159,7 @@ object ProcessUtils {
 fun Context.isMainProc(proc: String?): Boolean {
     return packageName == proc
 }
+
+fun String?.isMainProc(): Boolean {
+    return this?.contains(":") ?: false
+}

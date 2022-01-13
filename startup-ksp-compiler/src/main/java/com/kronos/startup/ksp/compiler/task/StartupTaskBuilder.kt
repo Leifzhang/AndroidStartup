@@ -16,7 +16,7 @@ import com.squareup.kotlinpoet.KModifier
  *  @Since 2022/1/7
  *
  */
-class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotation?) {
+class StartupTaskBuilder(val type: KSClassDeclaration, startupAnnotation: KSAnnotation?) {
 
     val className = type.toClassName()
     var isAsync = false
@@ -25,6 +25,7 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
     var processList = arrayListOf<String>()
     val dependOnClassList = mutableListOf<ClassName>()
     val dependOnStringList = mutableListOf<String>()
+    var mustAfter: Boolean = false
 
     init {
         type.annotations.forEach {
@@ -34,6 +35,9 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
             }
             if (annotation.canonicalName == "com.kronos.startup.annotation.startup.Await") {
                 isAwait = true
+            }
+            if (annotation.canonicalName == "com.kronos.startup.annotation.startup.MustAfter") {
+                mustAfter = true
             }
             if (annotation.canonicalName == "com.kronos.startup.annotation.startup.DependOn") {
                 val value = it.getMember<ArrayList<ClassName>>("dependOn")
@@ -87,7 +91,4 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
     }
 
 
-    fun isProcOther(): Boolean {
-        return strategy == "other"
-    }
 }

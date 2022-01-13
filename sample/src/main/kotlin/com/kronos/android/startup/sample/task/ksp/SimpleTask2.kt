@@ -7,6 +7,7 @@ import com.kronos.lib.startup.SimpleStartupTask
 import com.kronos.startup.TaskNameProvider
 import com.kronos.startup.annotation.Process
 import com.kronos.startup.annotation.StartupGroup
+import com.kronos.startup.annotation.startup.MustAfter
 
 /**
  *
@@ -15,6 +16,7 @@ import com.kronos.startup.annotation.StartupGroup
  *
  */
 @StartupGroup(strategy = Process.MAIN)
+@MustAfter
 class SimpleTask2 : SimpleStartupTask() {
 
     override val taskNameProvider: TaskNameProvider

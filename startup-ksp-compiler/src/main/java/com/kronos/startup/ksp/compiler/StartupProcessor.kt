@@ -7,12 +7,11 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Origin
 import com.kronos.startup.annotation.StartupGroup
 import com.kronos.startup.annotation.startup.Startup
-import com.kronos.startup.ksp.compiler.group.GenerateGroupKt
 import com.kronos.startup.ksp.compiler.group.GenerateProcGroupKt
+import com.kronos.startup.ksp.compiler.group.TaskBuilder
 import com.kronos.startup.ksp.compiler.task.GenerateTaskKt
 import com.kronos.startup.ksp.compiler.task.StartupTaskBuilder
 import com.kronos.startup.ksp.compiler.utils.getValueByDefault
-import com.squareup.kotlinpoet.ClassName
 
 class StartupProcessor(
     private val codeGenerator: CodeGenerator,
@@ -21,9 +20,8 @@ class StartupProcessor(
 ) : SymbolProcessor {
     private lateinit var startupGroupType: KSType
     private lateinit var startupType: KSType
-    private val taskGroupMap = hashMapOf<String, MutableList<ClassName>>()
     private val procTaskGroupMap =
-        hashMapOf<String, MutableList<Pair<ClassName, ArrayList<String>>>>()
+        hashMapOf<String, MutableList<Pair<TaskBuilder, ArrayList<String>>>>()
 
     private val taskMap = mutableListOf<StartupTaskBuilder>()
 
@@ -84,61 +82,44 @@ class StartupProcessor(
         val strategy = startGroupAnnotation.arguments.firstOrNull {
             it.name?.asString() == "strategy"
         }?.value.toString().toValue()
-        if (strategy.equals("other", true)) {
-            val key = PROC_MODULE_KEY
-            if (procTaskGroupMap[key] == null) {
-                procTaskGroupMap[key] = mutableListOf()
-            }
-            val list = procTaskGroupMap[key] ?: return
-            list.add(type.toClassName() to (startGroupAnnotation.getMember("processName")))
-        } else {
-            val key = strategy
-            if (taskGroupMap[key] == null) {
-                taskGroupMap[key] = mutableListOf()
-            }
-            val list = taskGroupMap[key] ?: return
-            list.add(type.toClassName())
+        if (procTaskGroupMap[strategy] == null) {
+            procTaskGroupMap[strategy] = mutableListOf()
         }
+        val mustAfter = type.annotations.firstOrNull {
+            val annotation = it.annotationType.resolve().toClassName()
+            annotation.canonicalName == "com.kronos.startup.annotation.startup.MustAfter"
+        }
+        val list = procTaskGroupMap[strategy] ?: return
+        val processName = if (strategy.equals("main", true)) {
+            arrayListOf("")
+        } else {
+            startGroupAnnotation.getMember("processName")
+        }
+        list.add(TaskBuilder(type.toClassName(), (mustAfter != null)) to processName)
+
     }
 
 
     override fun finish() {
         super.finish()
-        // logger.error("className:${moduleName}")
         try {
             val taskGenerate = GenerateTaskKt(taskMap, codeGenerator)
-            taskGenerate.taskGroupMap.forEach {
-                val list = taskGroupMap.getValueByDefault(it.key) {
-                    mutableListOf()
-                }
-                list.addAll(it.value)
-            }
             taskGenerate.procTaskGroupMap.forEach {
                 val list = procTaskGroupMap.getValueByDefault(it.key) {
                     mutableListOf()
                 }
                 list.addAll(it.value)
             }
-            taskGroupMap.forEach { it ->
-                val generateKt = GenerateGroupKt(
-                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
-                    codeGenerator
-                )
-                it.value.forEach { className ->
-                    generateKt.addStatement(className)
-                }
-                generateKt.generateKt()
-            }
+            val generateKt = GenerateProcGroupKt(
+                "${moduleName.upCaseKeyFirstChar()}${PROC_MODULE_KEY.upCaseKeyFirstChar()}",
+                codeGenerator
+            )
             procTaskGroupMap.forEach {
-                val generateKt = GenerateProcGroupKt(
-                    "${moduleName.upCaseKeyFirstChar()}${it.key.upCaseKeyFirstChar()}",
-                    codeGenerator
-                )
                 it.value.forEach { pair ->
                     generateKt.addStatement(pair.first, pair.second)
                 }
-                generateKt.generateKt()
             }
+            generateKt.generateKt()
         } catch (e: Exception) {
             logger.error(
                 "Error preparing :" + " ${e.stackTrace.joinToString("\n")}"
