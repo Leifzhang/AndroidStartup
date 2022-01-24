@@ -13,7 +13,7 @@ import com.kronos.startup.annotation.StartupGroup
  *  @Since 2021/11/26
  *
  */
-@StartupGroup()
+@StartupGroup
 class SimpleTask1 : SimpleStartupTask() {
     override val taskNameProvider: TaskNameProvider
         get() = SimpleTask1Provider

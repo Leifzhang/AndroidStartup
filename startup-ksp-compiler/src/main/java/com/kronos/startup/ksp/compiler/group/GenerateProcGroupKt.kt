@@ -2,6 +2,7 @@ package com.kronos.startup.ksp.compiler.group
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.kronos.startup.annotation.Lifecycle
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
@@ -13,10 +14,11 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
  */
 class GenerateProcGroupKt(
     name: String,
+    lifecycle: Lifecycle,
     private val codeGenerator: CodeGenerator
 ) {
 
-    private val className = "StartupProcTaskGroup${name.replace("[^0-9a-zA-Z_]+", "")}"
+    private val className = name.replace("[^0-9a-zA-Z_]+", "")
     private val specBuilder = FileSpec.builder("com.kronos.lib.startup.group", className)
     private val groupFun: FunSpec.Builder = FunSpec.builder("group").apply {
         addModifiers(KModifier.OVERRIDE)
@@ -27,12 +29,20 @@ class GenerateProcGroupKt(
         addStatement("val list = mutableListOf<StartupTask>()")
     }
 
+    private val stageFun: FunSpec.Builder = FunSpec.builder("lifecycle").apply {
+        addModifiers(KModifier.OVERRIDE)
+        returns(Lifecycle::class)
+        addStatement(
+            "return %T",
+            ClassName("com.kronos.startup.annotation.Lifecycle", lifecycle.value)
+        )
+    }
 
-    fun addStatement(builder: TaskBuilder, processes: ArrayList<String>) {
-        if (processes.isEmpty()) {
+    fun addStatement(builder: TaskBuilder) {
+        if (builder.processes.isEmpty()) {
             addClassName(builder)
         } else {
-            processes.forEach {
+            builder.processes.forEach {
                 if (it.isEmpty()) {
                     groupFun.beginControlFlow(
                         "if(process.%T())",
@@ -55,7 +65,7 @@ class GenerateProcGroupKt(
         }
     }
 
-    fun generateKt() {
+    fun generateKt(): String {
         groupFun.addStatement("return list")
         val helloWorld = TypeSpec.classBuilder(className)
             .addSuperinterface(
@@ -65,6 +75,7 @@ class GenerateProcGroupKt(
                 )
             )
             .addFunction(groupFun.build())
+            .addFunction(stageFun.build())
             .build()
         specBuilder.addType(helloWorld)
         val spec = specBuilder.build()
@@ -73,5 +84,6 @@ class GenerateProcGroupKt(
             val content = spec.toString().toByteArray()
             it.write(content)
         }
+        return className
     }
 }

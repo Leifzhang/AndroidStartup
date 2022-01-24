@@ -8,7 +8,8 @@ import com.squareup.kotlinpoet.ClassName
  *  @Since 2022/1/13
  *
  */
-class TaskBuilder(val className: ClassName, val mustAfter: Boolean = false) {
-
-
-}
+class TaskBuilder(
+    val className: ClassName,
+    val mustAfter: Boolean = false,
+    val processes: ArrayList<String> = arrayListOf()
+)

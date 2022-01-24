@@ -2,6 +2,7 @@ package com.kronos.startup.ksp.compiler.task
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.kronos.startup.annotation.Lifecycle
 import com.kronos.startup.ksp.compiler.group.TaskBuilder
 import com.squareup.kotlinpoet.*
 
@@ -13,7 +14,7 @@ class GenerateTaskKt(
     builders: MutableList<StartupTaskBuilder>,
     private val codeGenerator: CodeGenerator
 ) {
-    val procTaskGroupMap = hashMapOf<String, MutableList<Pair<TaskBuilder, ArrayList<String>>>>()
+    val procTaskGroupMap = hashMapOf<Lifecycle, MutableList<TaskBuilder>>()
 
 
     init {
@@ -28,17 +29,17 @@ class GenerateTaskKt(
         val name = taskBuilder.className
         val className = ClassName(name.packageName, name.simpleName + "Task")
 
-        val key = taskBuilder.strategy
+        val key = taskBuilder.lifecycle
         if (procTaskGroupMap[key] == null) {
             procTaskGroupMap[key] = mutableListOf()
         }
         val list = procTaskGroupMap[key] ?: return
-        val processName = if (key.equals("main", true)) {
+        val processName = if (taskBuilder.strategy.equals("main", true)) {
             arrayListOf("")
         } else {
             taskBuilder.processList
         }
-        list.add(TaskBuilder(className, taskBuilder.mustAfter) to processName)
+        list.add(TaskBuilder(className, taskBuilder.mustAfter, processName))
     }
 
     private fun generateTaskClass(taskBuilder: StartupTaskBuilder) {
