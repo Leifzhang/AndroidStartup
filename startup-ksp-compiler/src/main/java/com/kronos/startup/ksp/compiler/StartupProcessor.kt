@@ -89,7 +89,7 @@ class StartupProcessor(
 
         val lifecycle = type.annotations.firstOrNull {
             val annotation = it.annotationType.resolve().toClassName()
-            annotation.canonicalName == "com.kronos.startup.annotation.Stage"
+            annotation.canonicalName == "com.kronos.startup.annotation.Step"
         }?.let {
             it.arguments.firstOrNull { ksValue ->
                 ksValue.name?.asString() == "lifecycle"
