@@ -3,6 +3,9 @@ package com.kronos.startup.ksp.compiler.task
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.kronos.startup.annotation.Lifecycle
+import com.kronos.startup.annotation.nameToLifeCycle
+import com.kronos.startup.ksp.compiler.StartupProcessor.Companion.mLogger
 import com.kronos.startup.ksp.compiler.getMember
 import com.kronos.startup.ksp.compiler.toClassName
 import com.kronos.startup.ksp.compiler.toValue
@@ -16,16 +19,17 @@ import com.squareup.kotlinpoet.KModifier
  *  @Since 2022/1/7
  *
  */
-class StartupTaskBuilder(val type: KSClassDeclaration, startupAnnotation: KSAnnotation?) {
+class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotation?) {
 
     val className = type.toClassName()
     var isAsync = false
     var isAwait = false
     var strategy: String
-    var processList = arrayListOf<String>()
+    var processList: ArrayList<String> = arrayListOf()
     val dependOnClassList = mutableListOf<ClassName>()
     val dependOnStringList = mutableListOf<String>()
     var mustAfter: Boolean = false
+    var lifecycle: Lifecycle = Lifecycle.OnApplicationCrate
 
     init {
         type.annotations.forEach {
@@ -44,6 +48,13 @@ class StartupTaskBuilder(val type: KSClassDeclaration, startupAnnotation: KSAnno
                 dependOnClassList.addAll(value)
                 val dependOnTag = it.getMember<ArrayList<String>>("dependOnTag")
                 dependOnStringList.addAll(dependOnTag)
+            }
+            if (annotation.canonicalName == "com.kronos.startup.annotation.Stage") {
+                val value = it.arguments.firstOrNull {
+                    it.name?.asString() == "lifecycle"
+                }?.value.toString().nameToLifeCycle()
+                lifecycle = value
+                mLogger?.warn("stage:$value")
             }
         }
 

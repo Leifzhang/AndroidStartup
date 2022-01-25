@@ -1,5 +1,7 @@
 package com.kronos.lib.startup
 
+import com.kronos.startup.annotation.Lifecycle
+
 /**
  *
  *  @Author LiABao
@@ -12,7 +14,12 @@ interface StartupTaskGroup {
 }
 
 interface StartupTaskProcessGroup {
+
     fun group(builder: Startup.Builder, process: String): MutableList<StartupTask>
+
+    fun lifecycle(): Lifecycle = let {
+        return Lifecycle.OnApplicationCrate
+    }
 }
 
 fun startupTaskGroup(lambda: MutableList<StartupTask>.() -> Unit): StartupTaskGroup {

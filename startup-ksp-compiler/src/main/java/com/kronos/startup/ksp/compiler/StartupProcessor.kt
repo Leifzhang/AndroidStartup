@@ -5,13 +5,17 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Origin
+import com.kronos.startup.annotation.Lifecycle
 import com.kronos.startup.annotation.StartupGroup
+import com.kronos.startup.annotation.nameToLifeCycle
 import com.kronos.startup.annotation.startup.Startup
 import com.kronos.startup.ksp.compiler.group.GenerateProcGroupKt
 import com.kronos.startup.ksp.compiler.group.TaskBuilder
+import com.kronos.startup.ksp.compiler.stage.StageGenerateKt
 import com.kronos.startup.ksp.compiler.task.GenerateTaskKt
 import com.kronos.startup.ksp.compiler.task.StartupTaskBuilder
 import com.kronos.startup.ksp.compiler.utils.getValueByDefault
+import com.squareup.kotlinpoet.ClassName
 
 class StartupProcessor(
     private val codeGenerator: CodeGenerator,
@@ -21,7 +25,7 @@ class StartupProcessor(
     private lateinit var startupGroupType: KSType
     private lateinit var startupType: KSType
     private val procTaskGroupMap =
-        hashMapOf<String, MutableList<Pair<TaskBuilder, ArrayList<String>>>>()
+        hashMapOf<Lifecycle, MutableList<TaskBuilder>>()
 
     private val taskMap = mutableListOf<StartupTaskBuilder>()
 
@@ -82,21 +86,29 @@ class StartupProcessor(
         val strategy = startGroupAnnotation.arguments.firstOrNull {
             it.name?.asString() == "strategy"
         }?.value.toString().toValue()
-        if (procTaskGroupMap[strategy] == null) {
-            procTaskGroupMap[strategy] = mutableListOf()
+
+        val lifecycle = type.annotations.firstOrNull {
+            val annotation = it.annotationType.resolve().toClassName()
+            annotation.canonicalName == "com.kronos.startup.annotation.Stage"
+        }?.let {
+            it.arguments.firstOrNull { ksValue ->
+                ksValue.name?.asString() == "lifecycle"
+            }?.value.toString()
+        }.nameToLifeCycle()
+        if (procTaskGroupMap[lifecycle] == null) {
+            procTaskGroupMap[lifecycle] = mutableListOf()
         }
         val mustAfter = type.annotations.firstOrNull {
             val annotation = it.annotationType.resolve().toClassName()
             annotation.canonicalName == "com.kronos.startup.annotation.startup.MustAfter"
         }
-        val list = procTaskGroupMap[strategy] ?: return
+        val list = procTaskGroupMap[lifecycle] ?: return
         val processName = if (strategy.equals("main", true)) {
             arrayListOf("")
         } else {
             startGroupAnnotation.getMember("processName")
         }
-        list.add(TaskBuilder(type.toClassName(), (mustAfter != null)) to processName)
-
+        list.add(TaskBuilder(type.toClassName(), (mustAfter != null), processName))
     }
 
 
@@ -110,16 +122,25 @@ class StartupProcessor(
                 }
                 list.addAll(it.value)
             }
-            val generateKt = GenerateProcGroupKt(
-                "${moduleName.upCaseKeyFirstChar()}${PROC_MODULE_KEY.upCaseKeyFirstChar()}",
+            var index = 1
+            val nameList = mutableListOf<ClassName>()
+            procTaskGroupMap.forEach {
+                val generateKt = GenerateProcGroupKt(
+                    "${moduleName.upCaseKeyFirstChar()}${PROC_MODULE_KEY.upCaseKeyFirstChar()}${index++}",
+                    it.key,
+                    codeGenerator
+                )
+                it.value.forEach { value ->
+                    generateKt.addStatement(value)
+                }
+                nameList.add(generateKt.generateKt())
+            }
+            val stageGenerator = StageGenerateKt(
+                "${moduleName.upCaseKeyFirstChar()}StageBuilder",
+                nameList,
                 codeGenerator
             )
-            procTaskGroupMap.forEach {
-                it.value.forEach { pair ->
-                    generateKt.addStatement(pair.first, pair.second)
-                }
-            }
-            generateKt.generateKt()
+            stageGenerator.generateKt()
         } catch (e: Exception) {
             logger.error(
                 "Error preparing :" + " ${e.stackTrace.joinToString("\n")}"

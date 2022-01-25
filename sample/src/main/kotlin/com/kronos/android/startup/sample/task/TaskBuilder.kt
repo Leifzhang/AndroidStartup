@@ -3,7 +3,6 @@ package com.kronos.android.startup.sample.task
 import android.app.Application
 import android.util.Log
 import com.kronos.lib.startup.*
-import com.kronos.lib.startup.group.StartupProcTaskGroupApplicationProc
 import java.lang.Thread.sleep
 
 /**
@@ -76,7 +75,6 @@ fun Application.createStartup(): Startup.Builder = run {
             }
         }
         addTaskGroup { taskGroup() }
-        addProcTaskGroup { StartupProcTaskGroupApplicationProc() }
     }
 }
 

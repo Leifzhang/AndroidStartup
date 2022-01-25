@@ -1,8 +1,13 @@
 package com.kronos.android.startup.sample
 
 import android.app.Application
+import android.content.Context
 import com.kronos.android.startup.sample.task.createStartup
 import com.kronos.lib.startup.StartupConfig
+import com.kronos.lib.startup.startUp
+import com.kronos.lib.startup.step.ApplicationStageBuilder
+import com.kronos.lib.startup.step.StepStartupPack
+import com.kronos.startup.annotation.Lifecycle
 
 /**
  *
@@ -11,9 +16,26 @@ import com.kronos.lib.startup.StartupConfig
  *
  */
 class SampleApplication : Application() {
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        StepStartupPack.onApplicationAttach() {
+            add(ApplicationStageBuilder())
+        }
+        startUp(this) {
+            StepStartupPack.getTaskGroup(Lifecycle.AttachApplication)?.forEach {
+                addProcTaskGroup(it)
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         StartupConfig.debugMode = true
-        createStartup().build().start()
+        createStartup().apply {
+            StepStartupPack.getTaskGroup(Lifecycle.OnApplicationCrate)?.forEach {
+                addProcTaskGroup(it)
+            }
+        }.build().start()
     }
 }
