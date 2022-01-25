@@ -11,9 +11,11 @@ import com.kronos.startup.annotation.nameToLifeCycle
 import com.kronos.startup.annotation.startup.Startup
 import com.kronos.startup.ksp.compiler.group.GenerateProcGroupKt
 import com.kronos.startup.ksp.compiler.group.TaskBuilder
+import com.kronos.startup.ksp.compiler.stage.StageGenerateKt
 import com.kronos.startup.ksp.compiler.task.GenerateTaskKt
 import com.kronos.startup.ksp.compiler.task.StartupTaskBuilder
 import com.kronos.startup.ksp.compiler.utils.getValueByDefault
+import com.squareup.kotlinpoet.ClassName
 
 class StartupProcessor(
     private val codeGenerator: CodeGenerator,
@@ -121,7 +123,7 @@ class StartupProcessor(
                 list.addAll(it.value)
             }
             var index = 1
-            val nameList = mutableListOf<String>()
+            val nameList = mutableListOf<ClassName>()
             procTaskGroupMap.forEach {
                 val generateKt = GenerateProcGroupKt(
                     "${moduleName.upCaseKeyFirstChar()}${PROC_MODULE_KEY.upCaseKeyFirstChar()}${index++}",
@@ -133,6 +135,12 @@ class StartupProcessor(
                 }
                 nameList.add(generateKt.generateKt())
             }
+            val stageGenerator = StageGenerateKt(
+                "${moduleName.upCaseKeyFirstChar()}StageBuilder",
+                nameList,
+                codeGenerator
+            )
+            stageGenerator.generateKt()
         } catch (e: Exception) {
             logger.error(
                 "Error preparing :" + " ${e.stackTrace.joinToString("\n")}"

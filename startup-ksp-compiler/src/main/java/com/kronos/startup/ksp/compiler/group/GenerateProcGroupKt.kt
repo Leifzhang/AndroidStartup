@@ -65,7 +65,7 @@ class GenerateProcGroupKt(
         }
     }
 
-    fun generateKt(): String {
+    fun generateKt(): ClassName {
         groupFun.addStatement("return list")
         val helloWorld = TypeSpec.classBuilder(className)
             .addSuperinterface(
@@ -84,6 +84,6 @@ class GenerateProcGroupKt(
             val content = spec.toString().toByteArray()
             it.write(content)
         }
-        return className
+        return ClassName("com.kronos.lib.startup.group", className)
     }
 }
