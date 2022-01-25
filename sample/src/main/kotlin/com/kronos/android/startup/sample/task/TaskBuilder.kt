@@ -75,7 +75,6 @@ fun Application.createStartup(): Startup.Builder = run {
             }
         }
         addTaskGroup { taskGroup() }
-        //   addProcTaskGroup { StartupProcTaskGroupApplicationProc() }
     }
 }
 

@@ -1,7 +1,8 @@
 package com.kronos.lib.startup.step
 
-import android.content.Context
 import com.kronos.lib.startup.StartupTaskProcessGroup
+import com.kronos.lib.startup.utils.getValueByDefault
+import com.kronos.startup.annotation.Lifecycle
 
 /**
  *
@@ -18,18 +19,25 @@ object StepStartupPack {
     }
 
     fun onApplicationAttach(
-        context: Context,
         builder: MutableList<StepTaskBuilder>.() -> Unit
     ) {
         builder.invoke(stepTaskBuilders)
+        dispatcher()
     }
 
-    fun dispatcher() {
+    private fun dispatcher() {
         stepTaskBuilders.forEach {
-            it.invoke().forEach {
-                val key = it.lifecycle().value
-                lifeCycleStep
+            it.invoke().forEach { group ->
+                val key = group.lifecycle().value
+                val value = lifeCycleStep.getValueByDefault(key) {
+                    mutableListOf()
+                }
+                value.add(group)
             }
         }
+    }
+
+    fun getTaskGroup(lifecycle: Lifecycle): MutableList<StartupTaskProcessGroup>? {
+        return lifeCycleStep[lifecycle.value]
     }
 }
