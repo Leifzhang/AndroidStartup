@@ -6,7 +6,7 @@ import com.kronos.android.startup.sample.task.info
 import com.kronos.lib.startup.SimpleStartupTask
 import com.kronos.startup.TaskNameProvider
 import com.kronos.startup.annotation.Lifecycle
-import com.kronos.startup.annotation.Stage
+import com.kronos.startup.annotation.Step
 import com.kronos.startup.annotation.StartupGroup
 
 /**
@@ -16,7 +16,7 @@ import com.kronos.startup.annotation.StartupGroup
  *
  */
 @StartupGroup
-@Stage(Lifecycle.AfterUserPrivacy)
+@Step(Lifecycle.AfterUserPrivacy)
 class AsyncTask1 : SimpleStartupTask() {
 
     override fun mainThread(): Boolean {

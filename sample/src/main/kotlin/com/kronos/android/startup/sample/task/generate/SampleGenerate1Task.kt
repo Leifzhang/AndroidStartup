@@ -7,7 +7,7 @@ import com.kronos.android.startup.sample.task.info
 import com.kronos.lib.startup.TaskRunner
 import com.kronos.startup.annotation.Lifecycle
 import com.kronos.startup.annotation.Process
-import com.kronos.startup.annotation.Stage
+import com.kronos.startup.annotation.Step
 import com.kronos.startup.annotation.startup.Async
 import com.kronos.startup.annotation.startup.Await
 import com.kronos.startup.annotation.startup.DependOn
@@ -26,7 +26,7 @@ import com.kronos.startup.annotation.startup.Startup
     dependOnTag = ["taskB"]
 )
 @Startup(strategy = Process.MAIN)
-@Stage(Lifecycle.AttachApplication)
+@Step(Lifecycle.AttachApplication)
 class SampleGenerate1Task : TaskRunner {
 
     override fun run(context: Context) {

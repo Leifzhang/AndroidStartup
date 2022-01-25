@@ -5,7 +5,7 @@ import com.kronos.android.startup.sample.task.info
 import com.kronos.android.startup.sample.task.utils.toast
 import com.kronos.lib.startup.TaskRunner
 import com.kronos.startup.annotation.Lifecycle
-import com.kronos.startup.annotation.Stage
+import com.kronos.startup.annotation.Step
 import com.kronos.startup.annotation.startup.Startup
 
 /**
@@ -15,7 +15,7 @@ import com.kronos.startup.annotation.startup.Startup
  *
  */
 @Startup
-@Stage(Lifecycle.AfterUserPrivacy)
+@Step(Lifecycle.AfterUserPrivacy)
 class SimplePrivacyGenerateTask : TaskRunner {
 
     override fun run(context: Context) {
