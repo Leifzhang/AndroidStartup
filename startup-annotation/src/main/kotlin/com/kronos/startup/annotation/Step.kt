@@ -9,4 +9,4 @@ package com.kronos.startup.annotation
     AnnotationTarget.CLASS
 )
 @Retention
-annotation class Stage(val lifecycle: Lifecycle = Lifecycle.OnApplicationCrate)
+annotation class Step(val lifecycle: Lifecycle = Lifecycle.OnApplicationCrate)

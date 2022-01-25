@@ -49,7 +49,7 @@ class StartupTaskBuilder(type: KSClassDeclaration, startupAnnotation: KSAnnotati
                 val dependOnTag = it.getMember<ArrayList<String>>("dependOnTag")
                 dependOnStringList.addAll(dependOnTag)
             }
-            if (annotation.canonicalName == "com.kronos.startup.annotation.Stage") {
+            if (annotation.canonicalName == "com.kronos.startup.annotation.Step") {
                 val value = it.arguments.firstOrNull {
                     it.name?.asString() == "lifecycle"
                 }?.value.toString().nameToLifeCycle()
