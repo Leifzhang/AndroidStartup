@@ -14,6 +14,7 @@ import com.kronos.startup.ksp.compiler.group.TaskBuilder
 import com.kronos.startup.ksp.compiler.stage.StageGenerateKt
 import com.kronos.startup.ksp.compiler.task.GenerateTaskKt
 import com.kronos.startup.ksp.compiler.task.StartupTaskBuilder
+import com.kronos.startup.ksp.compiler.utils.fixClassName
 import com.kronos.startup.ksp.compiler.utils.getValueByDefault
 import com.squareup.kotlinpoet.ClassName
 
@@ -136,7 +137,7 @@ class StartupProcessor(
                 nameList.add(generateKt.generateKt())
             }
             val stageGenerator = StageGenerateKt(
-                "${moduleName.upCaseKeyFirstChar()}StageBuilder",
+                "${moduleName.upCaseKeyFirstChar()}StepBuilder",
                 nameList,
                 codeGenerator
             )
@@ -162,7 +163,9 @@ class StartupProcessorProvider : SymbolProcessorProvider {
         return StartupProcessor(
             environment.codeGenerator,
             environment.logger,
-            environment.options[KEY_MODULE_NAME] ?: "application"
+            (environment.options[KEY_MODULE_NAME] ?: "application").let {
+                it.fixClassName()
+            }
         )
     }
 }
