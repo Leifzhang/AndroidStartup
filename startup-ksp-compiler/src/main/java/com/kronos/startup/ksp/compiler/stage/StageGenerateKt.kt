@@ -2,6 +2,7 @@ package com.kronos.startup.ksp.compiler.stage
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.kronos.startup.ksp.compiler.utils.fixClassName
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
@@ -15,7 +16,7 @@ class StageGenerateKt(
     private val codeGenerator: CodeGenerator
 ) {
 
-    private val className = name.replace("[^0-9a-zA-Z_]+", "")
+    private val className = name.fixClassName()
     private val specBuilder = FileSpec.builder("com.kronos.lib.startup.step", className)
 
     private val groupFun: FunSpec.Builder = FunSpec.builder("invoke").apply {

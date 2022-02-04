@@ -7,7 +7,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.3")
+        classpath("com.android.tools.build:gradle:7.1.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -33,6 +33,19 @@ allprojects {
             }
         }
     }
+
+    // 项目内如果想要引用到生成的代码 使用下列方式
+    afterEvaluate {
+        extensions.findByType(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension::class)
+            ?.apply {
+                sourceSets.forEach {
+                    it.kotlin.srcDir("build/generated/ksp")
+                }
+            }
+    }
+
+
+
     group = "com.kronos.startup"
 }
 
