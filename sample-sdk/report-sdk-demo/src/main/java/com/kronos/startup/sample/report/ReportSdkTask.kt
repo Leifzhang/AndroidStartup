@@ -4,13 +4,13 @@ import android.content.Context
 import android.util.Log
 import com.kronos.lib.startup.NetworkSdkTaskProvider
 import com.kronos.lib.startup.TaskRunner
-import com.kronos.startup.annotation.Lifecycle
-import com.kronos.startup.annotation.Process
-import com.kronos.startup.annotation.Step
 import com.kronos.startup.annotation.startup.Async
 import com.kronos.startup.annotation.startup.Await
 import com.kronos.startup.annotation.startup.DependOn
 import com.kronos.startup.annotation.startup.Startup
+import com.kronos.startup.sample.report.di.ReportInitDelegate
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  *
@@ -21,14 +21,13 @@ import com.kronos.startup.annotation.startup.Startup
 @Async
 @Await
 @DependOn(dependOn = [NetworkSdkTaskProvider::class])
-@Startup(strategy = Process.MAIN)
-@Step(Lifecycle.AttachApplication)
-class ReportSdkTask : TaskRunner {
+@Startup
+class ReportSdkTask : KoinComponent, TaskRunner {
 
-
+    private val initDelegate: ReportInitDelegate by inject()
 
     override fun run(context: Context) {
-        info("ReportSdkTask")
+        info("ReportSdkTask appName is:${initDelegate.getAppName()}")
     }
 
 }
@@ -39,4 +38,4 @@ fun info(info: String) {
 }
 
 
-const val TAG = "START-DSL—TEST"
+const val TAG = "ReportSdkTask"

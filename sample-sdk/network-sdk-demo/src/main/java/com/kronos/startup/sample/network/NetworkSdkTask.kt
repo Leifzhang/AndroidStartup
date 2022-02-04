@@ -3,9 +3,7 @@ package com.kronos.startup.sample.network
 import android.content.Context
 import android.util.Log
 import com.kronos.lib.startup.TaskRunner
-import com.kronos.startup.annotation.Lifecycle
 import com.kronos.startup.annotation.Process
-import com.kronos.startup.annotation.Step
 import com.kronos.startup.annotation.startup.Async
 import com.kronos.startup.annotation.startup.Await
 import com.kronos.startup.annotation.startup.Startup
@@ -19,7 +17,6 @@ import com.kronos.startup.annotation.startup.Startup
 @Async
 @Await
 @Startup(strategy = Process.MAIN)
-@Step(Lifecycle.AttachApplication)
 class NetworkSdkTask : TaskRunner {
 
     override fun run(context: Context) {

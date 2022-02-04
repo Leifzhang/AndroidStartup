@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
     id("com.google.devtools.ksp") version "1.5.30-1.0.0"
 }
 
@@ -33,15 +34,6 @@ android {
     }
 }
 
-kotlin {
-    sourceSets.main {
-        kotlin.srcDir("build/generated/ksp")
-    }
-    sourceSets.test {
-        kotlin.srcDir("build/generated/ksp/test/kotlin")
-    }
-}
-
 dependencies {
 
     implementation(project(":network-sdk-demo"))
@@ -50,7 +42,9 @@ dependencies {
     implementation(project(":startup"))
     implementation(project(":startup-annotation"))
     ksp(project(":startup-ksp-compiler"))
+
     implementation("io.insert-koin:koin-android:3.1.5")
+
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.3.0")
     implementation("com.google.android.material:material:1.4.0")
