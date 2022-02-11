@@ -1,8 +1,15 @@
 pluginManagement {
+
     repositories {
-        gradlePluginPortal()
         google()
+        maven { setUrl("https://maven.aliyun.com/repository/central/") }
+        gradlePluginPortal()
         maven { setUrl("https://dl.bintray.com/kotlin/kotlin-eap") }
+    }
+
+    plugins {
+        id("com.google.devtools.ksp") version ("1.5.30-1.0.0") apply (false)
+
     }
 }
 
