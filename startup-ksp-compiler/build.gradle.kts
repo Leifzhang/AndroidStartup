@@ -2,7 +2,8 @@ import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 
 plugins {
     kotlin("jvm")
-    id("com.google.devtools.ksp") version "1.5.30-1.0.0"
+    id("maven-publish")
+    id("com.google.devtools.ksp")
 }
 dependencies {
     val kotlinVersion = getKotlinPluginVersion()

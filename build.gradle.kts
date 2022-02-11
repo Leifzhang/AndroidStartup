@@ -14,6 +14,7 @@ buildscript {
     }
 }
 
+
 allprojects {
     repositories {
         maven { setUrl("https://maven.aliyun.com/repository/central/") }
@@ -43,8 +44,6 @@ allprojects {
                 }
             }
     }
-
-
 
     group = "com.kronos.startup"
 }
